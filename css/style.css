@@ -1983,3 +1983,136 @@ textarea.form-control {
   100% {
     stroke-dasharray: 89, 200;
     stroke-dashoffset: -136px; } }
+
+:root {
+  --brand-gold: #e3aa20;
+  --brand-copper: #a84f1c;
+  --brand-brown: #382318;
+  --brand-cream: #fbf7f0;
+  --brand-muted: #735f52;
+}
+
+body {
+  color: var(--brand-muted);
+}
+
+h1, h2, h3, h4, h5,
+.h1, .h2, .h3, .h4, .h5 {
+  color: var(--brand-brown);
+}
+
+a,
+a:hover,
+.text-primary,
+.ftco-navbar-light.scrolled .nav-item.active > a,
+.ftco-navbar-light.scrolled .nav-link.active,
+.post-entry h3 a:hover,
+.fundraise-item a:hover,
+.footer .block-21 .heading a:hover,
+.footer a,
+.block-21 .text .heading a:hover,
+.block-23 ul li .icon {
+  color: var(--brand-copper);
+}
+
+.text-primary {
+  color: var(--brand-copper) !important;
+}
+
+.ftco-navbar-light.scrolled {
+  background: var(--brand-cream) !important;
+}
+
+.ftco-navbar-light.scrolled .nav-link {
+  color: var(--brand-brown) !important;
+}
+
+.ftco-navbar-light.scrolled .nav-item.active > a,
+.ftco-navbar-light.scrolled .nav-link.active {
+  color: var(--brand-copper) !important;
+}
+
+.ftco-navbar-light .navbar-nav > .nav-item.active > a:before {
+  background: var(--brand-gold);
+}
+
+@media (max-width: 991.98px) {
+  .ftco-navbar-light {
+    background: var(--brand-brown) !important;
+  }
+}
+
+.bg-light {
+  background: var(--brand-cream) !important;
+}
+
+.ftco-bg-dark,
+.footer {
+  background: var(--brand-brown);
+}
+
+.featured-donate.overlay-color:before,
+.featured-section.overlay-color:before {
+  background: var(--brand-copper);
+}
+
+.featured-donate.overlay-color-2:before,
+.featured-section.overlay-color-2:before {
+  background: var(--brand-brown);
+}
+
+.btn.btn-primary,
+.btn.btn-primary.btn-outline-primary:hover,
+.bg-primary,
+.custom-pagination li.active a,
+.custom-pagination .prev.active a,
+.custom-pagination .next.active a,
+.ftco-section-2 .section-2-blocks-wrapper .button {
+  background: var(--brand-gold) !important;
+  border-color: var(--brand-gold);
+  color: var(--brand-brown);
+}
+
+.btn.btn-primary:hover,
+.btn.btn-primary.btn-outline-primary {
+  border-color: var(--brand-copper);
+  color: var(--brand-copper);
+}
+
+.btn.btn-primary:hover {
+  background: transparent !important;
+}
+
+.btn.btn-white:hover {
+  background: var(--brand-brown);
+  color: #fff;
+}
+
+.btn.btn-success,
+.bg-success,
+.person-donate .donate-amount .amount,
+.custom-progress-success .progress-bar {
+  background-color: var(--brand-copper) !important;
+  border-color: var(--brand-copper) !important;
+}
+
+.block-48,
+.quote,
+.section-2-blocks-wrapper-2 .quote {
+  background-color: var(--brand-gold);
+  color: var(--brand-brown);
+}
+
+.form-control:focus,
+.form-control:active {
+  border-color: var(--brand-copper);
+}
+
+.comment-list li .comment-body .reply:hover {
+  background: var(--brand-brown);
+}
+
+.tagcloud a:hover {
+  border-color: var(--brand-copper);
+  color: var(--brand-copper);
+}
