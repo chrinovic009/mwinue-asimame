@@ -15,7 +15,7 @@
   var cancelReply = document.getElementById('cancel-reply');
   var honeypot = document.getElementById('comment-website');
   var replyTo = null;
-  var articleSlug = null;
+  var articleSlug = window.currentArticleSlug;
   var dateFormatter = new Intl.DateTimeFormat('fr-FR', {
     dateStyle: 'medium',
     timeStyle: 'short'
@@ -80,7 +80,7 @@
   function loadComments() {
     status.textContent = 'Chargement des commentaires…';
 
-    return fetch('/api/comments?slug=' + encodeURIComponent(articleSlug), {
+    return fetch('comments.php?article=' + encodeURIComponent(articleSlug), {
       headers: { Accept: 'application/json' },
       credentials: 'same-origin'
     }).then(function (response) {
@@ -148,12 +148,12 @@
     submitButton.disabled = true;
     setStatus(submitStatus, 'Envoi en cours…', false);
 
-    fetch('/api/comments', {
+    fetch('comments.php', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({
-        slug: articleSlug,
+        article: articleSlug,
         message: messageField.value,
         parent_id: replyTo,
         website: honeypot.value
@@ -185,11 +185,13 @@
     loadComments();
   });
   document.addEventListener('article:error', function () {
-    setStatus(status, 'Les commentaires ne sont pas disponibles sans actualité.', true);
+    setStatus(status, 'Les commentaires ne sont pas disponibles pour cette actualité.', true);
     form.querySelector('button[type="submit"]').disabled = true;
   });
-  if (window.currentArticleSlug) {
-    articleSlug = window.currentArticleSlug;
+  if (articleSlug) {
     loadComments();
+  } else {
+    setStatus(status, 'Les commentaires ne sont pas disponibles pour cette actualité.', true);
+    form.querySelector('button[type="submit"]').disabled = true;
   }
 }());
