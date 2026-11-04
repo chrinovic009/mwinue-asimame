@@ -1,15 +1,43 @@
 import { neon } from '@neondatabase/serverless';
 
 const defaultArticle = 'octobre-rose-bilan-2026';
-const validArticles = new Set([
-  'octobre-rose-realite',
-  'voix-et-mobilisation',
-  'prevention-priorite',
-  'octobre-rose-bilan-2026',
-  'toujours-forte',
-  'quand-amour-fait-mal',
-  'sante-femme-decide',
-]);
+const articles = {
+  'octobre-rose-realite': {
+    title: 'Octobre Rose n’est pas le rose. C’est une réalité.',
+    summary: 'Nous avons rappelé que derrière les rubans et les campagnes se cachent des femmes qui vivent l’anxiété, le doute ou la difficulté d’accéder aux soins. Le cancer du sein n’est pas un sujet décoratif : c’est une réalité qui mérite notre attention.',
+    category: 'Sensibilisation',
+  },
+  'voix-et-mobilisation': {
+    title: 'Et si votre voix pouvait faire la différence ?',
+    summary: 'Merci à toutes celles qui se sont mobilisées. Votre participation a rendu visible une cause qui nous concerne toutes. L’information et l’accès aux soins comptent ; le cancer du sein ne doit ni être un tabou ni une fatalité.',
+    category: 'Mobilisation',
+  },
+  'prevention-priorite': {
+    title: 'Faire de la prévention une priorité',
+    summary: 'Nous avons uni nos efforts avec le Centre de Diagnostic Eyano pour promouvoir le dépistage, renforcer la prévention et encourager les entreprises, institutions et partenaires à s’engager dans cette lutte.',
+    category: 'Partenariat',
+  },
+  'octobre-rose-bilan-2026': {
+    title: 'Octobre Rose : un mois s’achève, mais la lutte continue',
+    summary: 'Merci à nos partenaires, intervenants et femmes mobilisées pour avoir fait de cette campagne un moment fort de sensibilisation et d’engagement. Octobre Rose prend fin, mais notre combat pour l’information, le dépistage et l’accès aux soins continue.',
+    category: 'Bilan final',
+  },
+  'toujours-forte': {
+    title: 'Toujours forte... Mais à quel prix ?',
+    summary: 'Un temps d’échange autour de la charge mentale des femmes et de conseils pratiques pour retrouver son équilibre, ponctué d’un atelier de peinture et d’un moment de networking.',
+    category: 'Article',
+  },
+  'quand-amour-fait-mal': {
+    title: 'Quand l’amour fait mal',
+    summary: 'Une rencontre pour comprendre les violences conjugales et protéger la santé, la dignité et la vie des femmes : reconnaître les signes d’alerte, connaître ses droits et les moyens de protection, puis se reconstruire et aller de l’avant.',
+    category: 'Article',
+  },
+  'sante-femme-decide': {
+    title: 'La santé de la femme, qui décide vraiment ?',
+    summary: 'Un échange sur les décisions qui concernent la santé des femmes, leur droit à être informées et écoutées, et l’importance de pouvoir faire des choix éclairés pour leur bien-être.',
+    category: 'Article',
+  },
+};
 
 let client;
 
@@ -88,7 +116,7 @@ export default async function handler(request, response) {
     if (request.method === 'GET') {
       const url = new URL(request.url || '/', `https://${request.headers.host || 'localhost'}`);
       const article = url.searchParams.get('article') || defaultArticle;
-      if (!validArticles.has(article)) {
+      if (!Object.hasOwn(articles, article)) {
         sendJson(response, 404, { error: 'Cette actualité est introuvable.' });
         return;
       }
@@ -121,7 +149,7 @@ export default async function handler(request, response) {
     }
 
     const article = payload.article;
-    if (typeof article !== 'string' || !validArticles.has(article)) {
+    if (typeof article !== 'string' || !Object.hasOwn(articles, article)) {
       sendJson(response, 404, { error: 'Cette actualité est introuvable.' });
       return;
     }
@@ -149,8 +177,12 @@ export default async function handler(request, response) {
       SELECT slug FROM articles WHERE slug = ${article}
     `;
     if (!existingArticle) {
-      sendJson(response, 404, { error: 'Cette actualité est introuvable.' });
-      return;
+      const { title, summary, category } = articles[article];
+      await client`
+        INSERT INTO articles (slug, title, summary, category, body)
+        VALUES (${article}, ${title}, ${summary}, ${category}, ${summary})
+        ON CONFLICT (slug) DO NOTHING
+      `;
     }
 
     if (parentId !== null) {

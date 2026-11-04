@@ -15,7 +15,9 @@ La page blog-single.html affiche le contenu sélectionné avec le paramètre
 et les réponses dans une base SQLite. Sur Vercel, vercel.json redirige cette
 route vers l’API Node api/comments.js, qui utilise PostgreSQL via Neon. La
 variable d’environnement DATABASE_URL doit être configurée sur Vercel et la
-base doit contenir les tables articles et comments.
+base doit contenir les tables articles et comments. Si un article statique du
+site n’existe pas encore dans la table articles, l’API ajoute ses métadonnées
+avant d’enregistrer le premier commentaire.
 
 Sur un autre hébergement, le serveur doit exécuter PHP avec PDO_SQLite activé et
 autoriser PHP à écrire dans le dossier data/ (ou dans le dossier défini par la
