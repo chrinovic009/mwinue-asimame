@@ -16,6 +16,9 @@
   var honeypot = document.getElementById('comment-website');
   var replyTo = null;
   var articleSlug = window.currentArticleSlug;
+  var commentsEndpoint = window.location.hostname.endsWith('.vercel.app')
+    ? '/api/comments'
+    : 'comments.php';
   var dateFormatter = new Intl.DateTimeFormat('fr-FR', {
     dateStyle: 'medium',
     timeStyle: 'short'
@@ -80,7 +83,7 @@
   function loadComments() {
     status.textContent = 'Chargement des commentaires…';
 
-    return fetch('comments.php?article=' + encodeURIComponent(articleSlug), {
+    return fetch(commentsEndpoint + '?article=' + encodeURIComponent(articleSlug), {
       headers: { Accept: 'application/json' },
       credentials: 'same-origin'
     }).then(function (response) {
@@ -148,7 +151,7 @@
     submitButton.disabled = true;
     setStatus(submitStatus, 'Envoi en cours…', false);
 
-    fetch('comments.php', {
+    fetch(commentsEndpoint, {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
