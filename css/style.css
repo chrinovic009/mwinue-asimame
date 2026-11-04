@@ -1389,6 +1389,9 @@ textarea.form-control {
         font-size: 13px;
         letter-spacing: .1em;
         color: #ccc; }
+      .comment-list li .comment-body .comment-message {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere; }
       .comment-list li .comment-body .reply {
         padding: 5px 10px;
         background: #e6e6e6;
