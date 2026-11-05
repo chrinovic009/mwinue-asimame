@@ -30,7 +30,16 @@
     element.classList.toggle('text-muted', !isError);
   }
 
-  function renderComment(comment) {
+  function getCommentExcerpt(message) {
+    var excerpt = message.trim().replace(/\s+/g, ' ');
+    var characters = Array.from(excerpt);
+    if (characters.length > 140) {
+      excerpt = characters.slice(0, 140).join('').trimEnd() + '…';
+    }
+    return excerpt;
+  }
+
+  function renderComment(comment, parentComment) {
     var item = document.createElement('li');
     item.className = 'comment';
     item.id = 'comment-' + comment.id;
@@ -52,6 +61,24 @@
     meta.className = 'meta';
     meta.textContent = dateFormatter.format(new Date(comment.created_at));
 
+    if (parentComment) {
+      var replyReference = document.createElement('div');
+      replyReference.className = 'comment-reply-reference';
+
+      var referenceLink = document.createElement('a');
+      referenceLink.href = '#comment-' + parentComment.id;
+      referenceLink.textContent = parentComment.parent_id === null
+        ? 'Réponse au commentaire :'
+        : 'Réponse à une réponse :';
+
+      var referenceExcerpt = document.createElement('p');
+      referenceExcerpt.textContent = getCommentExcerpt(parentComment.message);
+
+      replyReference.appendChild(referenceLink);
+      replyReference.appendChild(referenceExcerpt);
+      body.appendChild(replyReference);
+    }
+
     var message = document.createElement('p');
     message.className = 'comment-message';
     message.textContent = comment.message;
@@ -64,7 +91,10 @@
     replyLink.addEventListener('click', function () {
       replyTo = Number(comment.id);
       replyContext.hidden = false;
-      replyContext.textContent = 'Votre réponse au commentaire du ' + meta.textContent + '.';
+      replyContext.textContent = (comment.parent_id === null
+        ? 'Votre réponse au commentaire'
+        : 'Votre réponse à une réponse') + ' du ' + meta.textContent + ' : « '
+        + getCommentExcerpt(comment.message) + ' »';
       cancelReply.hidden = false;
       messageField.focus();
     });
@@ -105,15 +135,25 @@
 
       var commentsById = new Map();
       comments.forEach(function (comment) {
-        commentsById.set(Number(comment.id), {
-          element: renderComment(comment),
+        commentsById.set(Number(comment.id), comment);
+      });
+
+      var entriesById = new Map();
+      comments.forEach(function (comment) {
+        var parent = comment.parent_id === null
+          ? null
+          : commentsById.get(Number(comment.parent_id));
+        entriesById.set(Number(comment.id), {
+          element: renderComment(comment, parent),
           children: null
         });
       });
 
       comments.forEach(function (comment) {
-        var entry = commentsById.get(Number(comment.id));
-        var parent = comment.parent_id === null ? null : commentsById.get(Number(comment.parent_id));
+        var entry = entriesById.get(Number(comment.id));
+        var parent = comment.parent_id === null
+          ? null
+          : entriesById.get(Number(comment.parent_id));
         if (parent) {
           if (!parent.children) {
             parent.children = document.createElement('ul');

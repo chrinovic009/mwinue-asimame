@@ -2119,3 +2119,24 @@ a:hover,
   border-color: var(--brand-copper);
   color: var(--brand-copper);
 }
+
+.comment-list li .comment-body .comment-reply-reference,
+#reply-context:not([hidden]) {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--brand-brown);
+  background: var(--brand-cream);
+}
+
+.comment-list li .comment-body .comment-reply-reference a {
+  color: var(--brand-brown);
+  font-weight: 600;
+}
+
+.comment-list li .comment-body .comment-reply-reference p {
+  margin: 6px 0 0;
+  color: var(--brand-muted);
+  font-style: italic;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
