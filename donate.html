@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faire un don — Mwinue Asimame</title>
+  <meta name="description" content="Soutenez les actions de Mwinue Asimame en faveur de la santé, des droits et de l’autonomisation des femmes.">
+  <link rel="icon" type="image/png" href="img/icone.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="css/custom.css" rel="stylesheet">
+  <link href="css/donate.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-nexora fixed-top">
+    <div class="container">
+      <a class="navbar-brand navbar-brand-custom" href="index.html"><img class="navbar-logo" src="img/logo-white.png" alt="Mwinue Asimame — Former. Eveiller. Promouvoir."></a>
+      <button class="navbar-toggler navbar-toggler-custom" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Ouvrir ou fermer le menu de navigation">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-1 mt-3 mt-lg-0">
+          <li class="nav-item"><a class="nav-link nav2" href="index.html">Accueil</a></li>
+          <li class="nav-item"><a class="nav-link nav2" href="about.html">Nos domaines</a></li>
+          <li class="nav-item"><a class="nav-link nav2" href="services.html">Nos réalisations</a></li>
+          <li class="nav-item"><a class="nav-link nav2" href="portfolio.html">Notre galerie</a></li>
+          <li class="nav-item"><a class="nav-link nav2" href="blog.html">Nos actualités</a></li>
+          <li class="nav-item"><a class="nav-link nav2" href="contact.html">Contactez-nous</a></li>
+          <li class="nav-item ms-lg-2 mt-2 mt-lg-0"><a href="donate.html" class="btn btn-primary btn-sm-custom w-100" aria-current="page">Faire un don</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="donate-hero">
+    <div class="container text-center">
+      <span class="eyebrow text-white">Former. Éveiller. Promouvoir.</span>
+      <h1 class="text-white mb-3">Votre don fait grandir les possibles</h1>
+      <p class="donate-hero-copy mb-0">Soutenez les actions de Mwinue Asimame pour la santé, les droits et l’autonomisation des femmes.</p>
+    </div>
+  </header>
+
+  <main class="donate-main">
+    <div class="container">
+      <section class="donate-card" aria-labelledby="donationTitle">
+        <div class="donate-progress" aria-label="Étapes du don">
+          <span class="donate-step-indicator is-current" data-step-indicator="1"><span>1</span> Votre don</span>
+          <span class="donate-progress-line"></span>
+          <span class="donate-step-indicator" data-step-indicator="2"><span>2</span> Réseau</span>
+          <span class="donate-progress-line"></span>
+          <span class="donate-step-indicator" data-step-indicator="3"><span>3</span> Confirmation</span>
+        </div>
+
+        <section data-donation-step="1">
+          <div class="donate-heading">
+            <h2 id="donationTitle">Choisissez le montant de votre don</h2>
+            <p>Chaque contribution soutient nos actions en faveur des femmes.</p>
+          </div>
+          <form id="donationForm" novalidate>
+            <fieldset class="donor-choice">
+              <legend>Comment souhaitez-vous apparaître ?</legend>
+              <div class="donor-choice-options">
+                <label class="donor-choice-option">
+                  <input type="radio" name="donorVisibility" value="anonymous" checked>
+                  <span><i class="bi bi-incognito" aria-hidden="true"></i> Je souhaite rester anonyme</span>
+                </label>
+                <label class="donor-choice-option">
+                  <input type="radio" name="donorVisibility" value="named">
+                  <span><i class="bi bi-person" aria-hidden="true"></i> Je souhaite indiquer mon nom</span>
+                </label>
+              </div>
+              <div class="donor-name-field" id="donorNameField" hidden>
+                <label class="form-label" for="donorName">Votre nom</label>
+                <input class="form-control" id="donorName" name="donorName" type="text" autocomplete="name" maxlength="100" placeholder="Nom et prénom">
+              </div>
+            </fieldset>
+
+            <fieldset class="amount-choice">
+              <legend>Choisissez ou saisissez un montant</legend>
+              <div class="donate-amount-options" aria-label="Montants suggérés">
+                <button type="button" class="donate-amount-option" data-amount="10000">10 000 FC</button>
+                <button type="button" class="donate-amount-option" data-amount="25000">25 000 FC</button>
+                <button type="button" class="donate-amount-option" data-amount="50000">50 000 FC</button>
+                <button type="button" class="donate-amount-option" data-amount="100000">100 000 FC</button>
+              </div>
+              <label class="visually-hidden" for="donationAmount">Montant libre en francs congolais</label>
+              <div class="donate-custom-amount">
+                <span aria-hidden="true">FC</span>
+                <input id="donationAmount" name="amount" type="number" inputmode="numeric" min="10000" step="1" placeholder="Autre montant" required aria-describedby="amountHelp amountError">
+              </div>
+              <p class="donate-help" id="amountHelp">Montant libre, à partir de 10 000 FC.</p>
+              <p class="donate-error" id="amountError" role="alert" hidden>Veuillez saisir un montant valide d’au moins 10 000 FC.</p>
+            </fieldset>
+
+            <label class="donate-purpose-label" for="donationPurpose">Je souhaite soutenir en priorité (facultatif)</label>
+            <select class="form-select donate-purpose" id="donationPurpose" name="purpose">
+              <option value="priorities">Les actions prioritaires de l’association</option>
+              <option value="health">La santé et le bien-être des femmes</option>
+              <option value="rights">La défense des droits des femmes</option>
+              <option value="training">La formation et l’autonomisation</option>
+            </select>
+
+            <p class="donate-form-note"><i class="bi bi-shield-check" aria-hidden="true"></i> Cette page ne demande jamais votre code PIN Mobile Money.</p>
+            <button type="submit" class="btn donate-next-button">Suivant <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></button>
+          </form>
+        </section>
+
+        <section data-donation-step="2" hidden aria-labelledby="networkTitle">
+          <div class="donate-heading">
+            <h2 id="networkTitle">Choisissez votre réseau</h2>
+            <p>Montant de votre don : <strong id="selectedAmount"></strong></p>
+          </div>
+          <div class="mobile-money-options" role="group" aria-label="Réseau Mobile Money">
+            <button type="button" class="mobile-money-option" data-network="airtel" aria-pressed="false">
+              <span class="mobile-money-logo airtel-logo" aria-hidden="true">A</span>
+              <span><strong>Airtel Money</strong><small>Paiement mobile</small></span>
+              <i class="bi bi-check-circle-fill network-check" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="mobile-money-option" data-network="mpesa" aria-pressed="false">
+              <span class="mobile-money-logo mpesa-logo" aria-hidden="true">M</span>
+              <span><strong>M-Pesa</strong><small>Paiement mobile</small></span>
+              <i class="bi bi-check-circle-fill network-check" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="mobile-money-option" data-network="orange" aria-pressed="false">
+              <span class="mobile-money-logo orange-logo" aria-hidden="true">O</span>
+              <span><strong>Orange Money</strong><small>Paiement mobile</small></span>
+              <i class="bi bi-check-circle-fill network-check" aria-hidden="true"></i>
+            </button>
+          </div>
+          <p class="donate-error" id="networkError" role="alert" hidden>Veuillez choisir un réseau pour continuer.</p>
+          <div class="donate-step-actions">
+            <button type="button" class="donate-back-button" data-previous-step="1"><i class="bi bi-arrow-left me-2" aria-hidden="true"></i>Retour</button>
+            <button type="button" class="btn donate-next-button" id="continuePayment">Continuer <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></button>
+          </div>
+        </section>
+
+        <section data-donation-step="3" hidden aria-labelledby="paymentStatusTitle">
+          <div class="donate-heading">
+            <span class="payment-status-icon"><i class="bi bi-info-circle" aria-hidden="true"></i></span>
+            <h2 id="paymentStatusTitle">Paiement Mobile Money non connecté</h2>
+            <p>Vous avez sélectionné <strong id="selectedNetwork"></strong> pour un don de <strong id="finalAmount"></strong>.</p>
+          </div>
+          <div class="payment-notice" role="status">
+            <p><strong>Aucun transfert n’a été initié.</strong> Le paiement en ligne de l’association n’est pas encore configuré. Une intégration officielle avec l’opérateur ou un prestataire agréé est nécessaire pour lancer et confirmer une transaction.</p>
+            <p class="mb-0">Ne saisissez et ne communiquez votre code PIN sur aucun formulaire de ce site. Pour connaître les moyens de soutenir Mwinue Asimame, contactez-nous à <a href="mailto:contact@mwinue-asimame.org">contact@mwinue-asimame.org</a> ou au <a href="tel:+243819580061">+243 819 580 061</a>.</p>
+          </div>
+          <button type="button" class="donate-back-button mt-4" data-previous-step="2"><i class="bi bi-arrow-left me-2" aria-hidden="true"></i>Choisir un autre réseau</button>
+        </section>
+        <p class="donate-status visually-hidden" id="donationStatus" role="status" aria-live="polite"></p>
+      </section>
+      <p class="donate-footer-note">Mwinue Asimame · Former. Éveiller. Promouvoir.</p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/donate.js"></script>
+</body>
+</html>
