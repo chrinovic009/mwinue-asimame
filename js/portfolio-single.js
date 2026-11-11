@@ -1,231 +1,191 @@
 (function () {
   'use strict';
 
+  var campaigns = {
+    sante: {
+      category: 'Santé',
+      theme: 'Octobre Rose 2026 · Cancer du sein',
+      storyTitle: 'Octobre Rose 2026 : sensibiliser pour mieux prévenir',
+      story1: 'Tout au long du mois d’octobre, Mwinue Asimame s’est mobilisée autour de la lutte contre le cancer du sein. Les actions de sensibilisation et le partenariat avec le Centre de Diagnostic Eyano ont mis en lumière l’importance de la prévention et du dépistage précoce.',
+      story2: 'La campagne rappelle l’importance de l’information, de l’accès aux soins et des échanges avec des professionnels de santé.',
+      closing: 'La sensibilisation au cancer du sein contribue à faire de la santé des femmes une priorité.',
+      facts: ['Octobre Rose 2026', 'Prévention', 'Centre de Diagnostic Eyano'],
+      tags: ['Santé', 'Cancer du sein', 'Sensibilisation']
+    },
+    droits: {
+      category: 'Droits',
+      theme: 'Charge mentale des femmes',
+      storyTitle: 'Toujours forte... Mais à quel prix ?',
+      story1: 'Cette réalisation ouvre un espace d’échange sur la charge mentale et les pressions que les femmes portent souvent en silence. Les échanges, les conseils pratiques, l’atelier de peinture et le moment de networking ont encouragé les participantes à retrouver leur équilibre et à prendre soin d’elles-mêmes.',
+      story2: 'Avec l’accompagnement du CT Gabin Nyingika, la rencontre a permis de reconnaître ces réalités et de partager des pistes pour préserver le bien-être des femmes.',
+      closing: 'La charge mentale mérite d’être entendue et prise en compte dans le quotidien des femmes.',
+      facts: ['Charge mentale', 'CT Gabin Nyingika', 'Bien-être des femmes'],
+      tags: ['Droits', 'Charge mentale', 'Écoute']
+    },
+    formations: {
+      category: 'Autonomisation',
+      theme: 'Sensibilisation aux violences conjugales',
+      storyTitle: 'Quand l’amour fait mal',
+      story1: 'Cette réalisation sensibilise aux violences conjugales et à leurs conséquences sur la santé, la dignité et la vie des femmes. La rencontre a abordé la reconnaissance des signes d’alerte, les droits et les moyens de protection.',
+      story2: 'Avec l’accompagnement de Maître Mamy Onenda, les échanges ont également évoqué les chemins possibles vers la reconstruction.',
+      closing: 'Informer sur les violences conjugales, les droits et les moyens de protection contribue à soutenir les femmes.',
+      facts: ['Violences conjugales', 'Maître Mamy Onenda', 'Droits et protection'],
+      tags: ['Violences conjugales', 'Droits', 'Sensibilisation']
+    }
+  };
+
   var photos = [
     {
       id: 'sante-1',
       image: 'img/galerie/sante/1.jpeg',
-      category: 'Santé',
-      theme: 'Sensibilisation au cancer du sein',
-      title: 'Campagne de sensibilisation au cancer du sein',
-      alt: 'Rencontre de sensibilisation au cancer du sein',
-      intro: 'Cette photographie montre des participantes réunies autour d’une action de sensibilisation au cancer du sein, portée par Mwinue Asimame.',
-      storyTitle: 'Informer et sensibiliser sur le cancer du sein',
-      story1: 'La rencontre offre un espace pour partager des informations et attirer l’attention sur la santé des femmes. Les rubans roses visibles rappellent l’importance de parler du cancer du sein et de la prévention.',
-      story2: 'À travers ses campagnes, Mwinue Asimame encourage les femmes à s’informer et à demander conseil à des professionnels de santé.',
-      closing: 'La sensibilisation et l’accès à une information fiable contribuent à faire de la santé des femmes une priorité.',
-      facts: ['Santé des femmes', 'Prévention', 'Sensibilisation'],
-      tags: ['Santé', 'Prévention', 'Cancer du sein']
+      campaign: 'sante',
+      title: 'Octobre Rose : informer pour prévenir le cancer du sein',
+      alt: 'Action d’information sur le cancer du sein pendant Octobre Rose',
+      intro: 'Cette photo s’inscrit dans la campagne Octobre Rose 2026 de Mwinue Asimame, consacrée à la prévention et à la sensibilisation au cancer du sein.'
     },
     {
       id: 'droits-1',
       image: 'img/galerie/droits/1.jpeg',
-      category: 'Droits',
-      theme: 'Charge mentale',
-      title: 'Une rencontre consacrée à la charge mentale',
-      alt: 'Intervenante prenant la parole lors d’un échange sur la charge mentale',
-      intro: 'Une intervenante s’adresse aux participantes au cours d’une rencontre consacrée à la charge mentale des femmes.',
-      storyTitle: 'Mettre des mots sur la charge mentale',
-      story1: 'Cette rencontre crée un temps d’écoute et de partage autour des responsabilités et des pressions que les femmes peuvent porter au quotidien.',
-      story2: 'Les échanges invitent à reconnaître ces réalités, à partager les expériences et à réfléchir à des moyens de préserver son équilibre.',
-      closing: 'Le bien-être des femmes mérite une attention qui ne se limite pas aux attentes placées sur elles.',
-      facts: ['Échanges', 'Écoute', 'Bien-être des femmes'],
-      tags: ['Droits', 'Charge mentale', 'Bien-être']
+      campaign: 'droits',
+      title: 'Charge mentale : mettre des mots sur les pressions invisibles',
+      alt: 'Intervenante lors d’un échange sur la charge mentale',
+      intro: 'Cette image renvoie aux échanges de la rencontre « Toujours forte... Mais à quel prix ? », consacrée à la charge mentale des femmes.'
     },
     {
       id: 'formations-1',
       image: 'img/galerie/formations/1.jpeg',
-      category: 'Autonomisation',
-      theme: 'Formation entrepreneuriale',
-      title: 'Formation entrepreneuriale',
-      alt: 'Intervenante s’exprimant devant les participantes à une formation entrepreneuriale',
-      intro: 'Une intervenante prend la parole au cours d’une formation entrepreneuriale organisée dans le cadre des initiatives de Mwinue Asimame.',
-      storyTitle: 'Renforcer les capacités entrepreneuriales',
-      story1: 'La formation met les participantes en contact avec des contenus et des échanges autour de l’entrepreneuriat.',
-      story2: 'Ce temps collectif valorise le partage d’expériences et la possibilité pour chacune de développer ses capacités et ses projets.',
-      closing: 'L’autonomisation passe aussi par l’accès aux connaissances et aux occasions de se former.',
-      facts: ['Formation', 'Entrepreneuriat', 'Renforcement des capacités'],
-      tags: ['Autonomisation', 'Formation', 'Entrepreneuriat']
+      campaign: 'formations',
+      title: 'Violences conjugales : reconnaître les signes d’alerte',
+      alt: 'Intervention lors d’une rencontre de sensibilisation aux violences conjugales',
+      intro: 'Cette photo s’inscrit dans la rencontre « Quand l’amour fait mal », consacrée à la sensibilisation aux violences conjugales.'
     },
     {
       id: 'droits-2',
       image: 'img/galerie/droits/2.jpeg',
-      category: 'Droits',
-      theme: 'Charge mentale',
-      title: 'Une rencontre consacrée à la charge mentale',
-      alt: 'Participantes attentives lors d’une rencontre autour de la charge mentale',
-      intro: 'Les participantes prennent part à une rencontre d’échange consacrée à la charge mentale et au vécu des femmes.',
-      storyTitle: 'Un espace d’écoute et de partage',
-      story1: 'La rencontre permet d’accueillir les paroles et les expériences des participantes, et d’aborder les pressions qui peuvent peser sur leur quotidien.',
-      story2: 'En partageant leurs points de vue, les femmes peuvent mieux faire reconnaître ces réalités et réfléchir ensemble à leur bien-être.',
-      closing: 'S’écouter et échanger aide à faire du bien-être des femmes un sujet de dialogue.',
-      facts: ['Rencontre', 'Partage d’expériences', 'Écoute'],
-      tags: ['Droits', 'Charge mentale', 'Échanges']
+      campaign: 'droits',
+      title: 'Charge mentale : écouter les expériences des femmes',
+      alt: 'Participantes lors d’un échange autour de la charge mentale',
+      intro: 'Cette image illustre le temps d’écoute et de partage proposé aux participantes autour de la charge mentale.'
     },
     {
       id: 'sante-2',
       image: 'img/galerie/sante/2.jpeg',
-      category: 'Santé',
-      theme: 'Sensibilisation au cancer du sein',
-      title: 'Campagne de sensibilisation au cancer du sein',
-      alt: 'Participantes réunies lors d’une action de sensibilisation au cancer du sein',
-      intro: 'Cette image montre les participantes réunies lors d’une action de sensibilisation au cancer du sein.',
-      storyTitle: 'Une mobilisation autour de la santé des femmes',
-      story1: 'La présence de participantes venues écouter et échanger illustre l’importance de créer des espaces où les questions de santé peuvent être abordées.',
-      story2: 'La campagne rappelle l’intérêt de s’informer sur le cancer du sein et d’échanger avec des professionnels de santé en cas de question ou d’inquiétude.',
-      closing: 'La prévention commence aussi par une information accessible et des échanges sans tabou.',
-      facts: ['Santé des femmes', 'Information', 'Prévention'],
-      tags: ['Santé', 'Cancer du sein', 'Sensibilisation']
+      campaign: 'sante',
+      title: 'Cancer du sein : sensibiliser et encourager la prévention',
+      alt: 'Échanges de prévention autour du cancer du sein',
+      intro: 'Cette photo accompagne les échanges de la campagne Octobre Rose 2026 sur la prévention et le dépistage précoce du cancer du sein.'
     },
     {
       id: 'formations-2',
       image: 'img/galerie/formations/2.jpeg',
-      category: 'Autonomisation',
-      theme: 'Formation entrepreneuriale',
-      title: 'Formation entrepreneuriale',
-      alt: 'Intervenante partageant des informations pendant une formation entrepreneuriale',
-      intro: 'Une intervenante partage des informations avec les participantes d’une formation entrepreneuriale.',
-      storyTitle: 'Apprendre et avancer ensemble',
-      story1: 'La formation rassemble des participantes autour de l’apprentissage et du partage de connaissances liées à l’entrepreneuriat.',
-      story2: 'Ces moments peuvent aider les femmes à nourrir leurs idées et à renforcer leurs capacités dans la réalisation de leurs projets.',
-      closing: 'La formation est un levier pour encourager la confiance, l’initiative et l’autonomie.',
-      facts: ['Apprentissage', 'Entrepreneuriat', 'Initiative'],
-      tags: ['Autonomisation', 'Formation', 'Projets']
+      campaign: 'formations',
+      title: 'Violences conjugales : comprendre les signes d’alerte',
+      alt: 'Échanges sur la prévention des violences conjugales',
+      intro: 'Cette photo fait écho aux échanges de « Quand l’amour fait mal » sur la reconnaissance des signes d’alerte des violences conjugales.'
     },
     {
       id: 'droits-3',
       image: 'img/galerie/droits/3.jpeg',
-      category: 'Droits',
-      theme: 'Droits des femmes',
-      title: 'Un espace d’échange consacré aux droits des femmes',
-      alt: 'Femmes réunies pour échanger dans un cadre de rencontre',
-      intro: 'Des femmes sont réunies dans un cadre d’échange consacré aux réalités et aux droits des femmes.',
-      storyTitle: 'Faire une place à la parole des femmes',
-      story1: 'Les espaces de dialogue permettent de partager les expériences et de mieux faire connaître les sujets qui touchent les droits et le quotidien des femmes.',
-      story2: 'L’écoute et la circulation d’informations contribuent à ce que chacune puisse mieux comprendre les enjeux et faire entendre sa voix.',
-      closing: 'La défense des droits passe aussi par des espaces où les femmes peuvent s’informer et s’exprimer.',
-      facts: ['Droits', 'Dialogue', 'Participation'],
-      tags: ['Droits des femmes', 'Échanges', 'Information']
+      campaign: 'droits',
+      title: 'Charge mentale : faire une place à la parole des femmes',
+      alt: 'Femmes réunies pour échanger autour de la charge mentale',
+      intro: 'Cette photo se rapporte à l’espace de dialogue créé par « Toujours forte... Mais à quel prix ? » pour parler de la charge mentale.'
     },
     {
       id: 'sante-3',
       image: 'img/galerie/sante/3.jpeg',
-      category: 'Santé',
-      theme: 'Octobre Rose',
-      title: 'Campagne de sensibilisation au cancer du sein',
-      alt: 'Campagne Octobre Rose portant le message Notre santé, notre droit',
-      intro: 'Le visuel Octobre Rose rappelle que la santé des femmes est un droit et qu’elles doivent pouvoir être écoutées, informées et soignées.',
-      storyTitle: 'Notre santé, notre droit',
-      story1: 'La campagne met en avant la sensibilisation au cancer du sein et l’importance de placer les femmes au cœur des décisions qui concernent leur santé.',
-      story2: 'Être écoutée, informée et accompagnée contribue à mieux comprendre les enjeux de prévention et à s’orienter vers des soins adaptés.',
-      closing: 'La sensibilisation au cancer du sein s’inscrit dans un engagement plus large en faveur du droit à la santé.',
-      facts: ['Octobre Rose', 'Droit à la santé', 'Prévention'],
-      tags: ['Santé', 'Octobre Rose', 'Droits']
+      campaign: 'sante',
+      title: 'Octobre Rose : notre santé, notre droit',
+      alt: 'Visuel Octobre Rose sur le droit à la santé des femmes',
+      intro: 'Le visuel Octobre Rose rappelle que la campagne porte aussi sur le droit des femmes à être informées et accompagnées face au cancer du sein.'
     },
     {
       id: 'formations-3',
       image: 'img/galerie/formations/3.jpeg',
-      category: 'Autonomisation',
-      theme: 'Formation entrepreneuriale',
-      title: 'Formation entrepreneuriale',
-      alt: 'Participante prenant la parole pendant une formation entrepreneuriale',
-      intro: 'Une participante prend la parole au cours d’une activité de formation entrepreneuriale.',
-      storyTitle: 'Encourager l’initiative et le partage',
-      story1: 'Les temps de formation favorisent la transmission de connaissances et donnent aux participantes l’occasion de prendre part activement aux échanges.',
-      story2: 'La participation et le partage d’idées soutiennent le développement de projets et le renforcement des capacités.',
-      closing: 'Mwinue Asimame encourage les initiatives qui contribuent à l’autonomie des femmes.',
-      facts: ['Participation', 'Entrepreneuriat', 'Autonomie'],
-      tags: ['Autonomisation', 'Formation', 'Initiative']
+      campaign: 'formations',
+      title: 'Violences conjugales : connaître ses droits et se protéger',
+      alt: 'Échanges sur les droits et la protection face aux violences conjugales',
+      intro: 'Cette image se rattache à la réalisation « Quand l’amour fait mal », qui aborde les droits et les moyens de protection face aux violences conjugales.'
     },
     {
       id: 'sante-4',
       image: 'img/galerie/sante/4.jpeg',
-      category: 'Santé',
-      theme: 'Professionnelles de la santé',
+      campaign: 'sante',
       title: "Avec l'association des femmes professionnelles de la santé",
       alt: 'Femmes professionnelles de la santé réunies lors d’une rencontre',
-      intro: 'Cette photographie présente des femmes réunies dans le cadre d’une rencontre avec l’association des femmes professionnelles de la santé.',
-      storyTitle: 'La santé portée par les femmes',
-      story1: 'La présence de professionnelles de la santé met en lumière le rôle des femmes engagées dans les domaines du soin et de la santé.',
-      story2: 'Ces échanges favorisent les liens et la mobilisation autour des enjeux de santé qui concernent les femmes et les communautés.',
-      closing: 'La collaboration et la reconnaissance de l’expertise des femmes contribuent à faire progresser la santé.',
-      facts: ['Professionnelles', 'Santé', 'Collaboration'],
-      tags: ['Santé', 'Professionnelles', 'Engagement']
+      intro: 'Cette photographie met en avant la rencontre avec l’association des femmes professionnelles de la santé, dans le contexte des actions de sensibilisation au cancer du sein.'
     },
     {
       id: 'droits-4',
       image: 'img/galerie/droits/4.jpeg',
-      category: 'Droits',
-      theme: 'Charge mentale',
-      title: 'Une rencontre consacrée à la charge mentale',
-      alt: 'Portrait d’une participante lors d’une rencontre sur la charge mentale',
-      intro: 'Le portrait d’une participante témoigne de l’écoute et de l’attention portées aux femmes lors d’une rencontre consacrée à la charge mentale.',
-      storyTitle: 'Écouter les réalités vécues',
-      story1: 'Parler de charge mentale permet de reconnaître les responsabilités et les pressions qui peuvent affecter l’équilibre et le bien-être des femmes.',
-      story2: 'La rencontre donne une place aux témoignages et encourage le partage de pistes pour prendre soin de soi.',
-      closing: 'Chaque femme mérite un espace où son expérience peut être entendue avec attention.',
-      facts: ['Charge mentale', 'Écoute', 'Bien-être'],
-      tags: ['Droits', 'Charge mentale', 'Santé mentale']
+      campaign: 'droits',
+      title: 'Charge mentale : reconnaître les pressions du quotidien',
+      alt: 'Participante lors d’une rencontre sur la charge mentale',
+      intro: 'Ce portrait témoigne de l’attention portée aux participantes de « Toujours forte... Mais à quel prix ? », une rencontre sur la charge mentale.'
     },
     {
       id: 'formations-4',
       image: 'img/galerie/formations/4.jpeg',
-      category: 'Autonomisation',
-      theme: 'Formation entrepreneuriale',
-      title: 'Formation entrepreneuriale',
-      alt: 'Participante assistant à une formation entrepreneuriale',
-      intro: 'Une participante suit une session de formation entrepreneuriale organisée par Mwinue Asimame.',
-      storyTitle: 'Se former pour développer ses projets',
-      story1: 'La formation entrepreneuriale offre un cadre d’apprentissage et de réflexion autour des projets et des initiatives des femmes.',
-      story2: 'La participation à ces activités permet de renforcer les connaissances et de s’inspirer des échanges avec les autres participantes.',
-      closing: 'L’accès à la formation soutient l’autonomisation et l’épanouissement des femmes.',
-      facts: ['Formation', 'Projets', 'Autonomisation'],
-      tags: ['Autonomisation', 'Entrepreneuriat', 'Apprentissage']
+      campaign: 'formations',
+      title: 'Violences conjugales : briser le silence et demander de l’aide',
+      alt: 'Participante à une rencontre sur les violences conjugales',
+      intro: 'Cette photo s’inscrit dans la sensibilisation menée lors de « Quand l’amour fait mal » et dans les échanges sur les moyens de protection.'
+    },
+    {
+      id: 'droits-6',
+      image: 'img/galerie/droits/6.jpeg',
+      campaign: 'droits',
+      title: 'Charge mentale : échanger pour préserver son équilibre',
+      alt: 'Participante lors d’un échange sur la charge mentale',
+      intro: 'Cette image est liée aux échanges et aux conseils pratiques de la rencontre « Toujours forte... Mais à quel prix ? ».'
     },
     {
       id: 'sante-5',
       image: 'img/galerie/sante/5.jpeg',
-      category: 'Santé',
-      theme: 'Sensibilisation aux cancers',
-      title: 'Unis contre les cancers : de la sensibilisation à l’action',
-      alt: 'Groupe réuni lors d’une mobilisation de sensibilisation contre les cancers',
-      intro: 'Des participantes et des partenaires sont réunis autour d’une mobilisation de sensibilisation contre les cancers.',
-      storyTitle: 'De la sensibilisation à l’action',
-      story1: 'Le message de la campagne appelle à unir les efforts pour mieux faire connaître les cancers et encourager la prévention.',
-      story2: 'La mobilisation collective rassemble des personnes engagées autour d’un objectif commun : faire de la santé une priorité et promouvoir l’accès à une information fiable.',
-      closing: 'La lutte contre les cancers nécessite une mobilisation et une attention qui se poursuivent au-delà des campagnes.',
-      facts: ['Mobilisation', 'Prévention', 'Santé'],
-      tags: ['Santé', 'Cancers', 'Sensibilisation']
+      campaign: 'sante',
+      title: 'Octobre Rose : se mobiliser contre le cancer du sein',
+      alt: 'Mobilisation collective d’Octobre Rose contre le cancer du sein',
+      intro: 'La mobilisation photographiée s’inscrit dans la campagne Octobre Rose 2026 de Mwinue Asimame contre le cancer du sein.'
+    },
+    {
+      id: 'droits-7',
+      image: 'img/galerie/droits/7.jpeg',
+      campaign: 'droits',
+      title: 'Charge mentale : prendre soin de soi et retrouver l’équilibre',
+      alt: 'Participante lors d’un échange autour de la charge mentale',
+      intro: 'Cette photo rappelle l’objectif de la rencontre « Toujours forte... Mais à quel prix ? » : encourager les femmes à prendre soin d’elles-mêmes.'
+    },
+    {
+      id: 'formations-6',
+      image: 'img/galerie/formations/6.jpeg',
+      campaign: 'formations',
+      title: 'Quand l’amour fait mal : accompagner la reconstruction',
+      alt: 'Groupe réuni lors d’une rencontre sur les violences conjugales',
+      intro: 'Cette image renvoie aux échanges de « Quand l’amour fait mal » sur les violences conjugales et les chemins possibles vers la reconstruction.'
     },
     {
       id: 'droits-5',
       image: 'img/galerie/droits/5.jpeg',
-      category: 'Droits',
-      theme: 'Droits des femmes',
-      title: 'Un espace d’échange consacré aux droits des femmes',
-      alt: 'Participante prenant part à un échange autour des droits des femmes',
-      intro: 'Une participante prend part à un échange autour des droits des femmes et des enjeux qui les concernent.',
-      storyTitle: 'S’informer et faire entendre sa voix',
-      story1: 'Les rencontres et les échanges permettent de faire circuler l’information et d’aborder les droits des femmes dans un cadre d’écoute.',
-      story2: 'Partager ses expériences et poser des questions contribue à renforcer la participation des femmes aux sujets qui touchent leur vie.',
-      closing: 'Mwinue Asimame œuvre pour que les femmes soient informées, écoutées et actrices de leurs choix.',
-      facts: ['Information', 'Droits', 'Participation'],
-      tags: ['Droits des femmes', 'Écoute', 'Échanges']
+      campaign: 'droits',
+      title: 'Charge mentale : partager des pistes pour se ressourcer',
+      alt: 'Échange entre participantes autour de la charge mentale',
+      intro: 'Cette photo se rapporte aux pistes et conseils pratiques partagés lors de la rencontre « Toujours forte... Mais à quel prix ? ».'
     },
     {
       id: 'formations-5',
       image: 'img/galerie/formations/5.jpeg',
-      category: 'Autonomisation',
-      theme: 'Formation entrepreneuriale',
-      title: 'Formation entrepreneuriale',
-      alt: 'Groupe de participantes réuni lors d’une formation entrepreneuriale',
-      intro: 'Un groupe de participantes est réuni à l’occasion d’une formation entrepreneuriale.',
-      storyTitle: 'Un temps collectif pour apprendre',
-      story1: 'La formation rassemble les participantes autour de l’entrepreneuriat et favorise l’apprentissage dans un cadre collectif.',
-      story2: 'Les échanges entre participantes sont une occasion de partager des idées et de soutenir les démarches entrepreneuriales.',
-      closing: 'En renforçant les capacités et les échanges, ces initiatives accompagnent l’autonomisation des femmes.',
-      facts: ['Entrepreneuriat', 'Apprentissage', 'Partage'],
-      tags: ['Autonomisation', 'Formation', 'Entrepreneuriat']
+      campaign: 'formations',
+      title: 'Violences conjugales : agir pour la dignité et la reconstruction',
+      alt: 'Groupe réuni pour échanger sur les violences conjugales',
+      intro: 'Cette photo illustre l’initiative « Quand l’amour fait mal » et son engagement pour les droits, la protection et la dignité des femmes.'
+    },
+    {
+      id: 'droits-8',
+      image: 'img/galerie/droits/8.jpeg',
+      campaign: 'droits',
+      title: 'Charge mentale : sensibiliser aux réalités vécues',
+      alt: 'Participante lors d’un échange autour de la charge mentale',
+      intro: 'Cette image est liée à la sensibilisation et au partage d’expériences proposés par « Toujours forte... Mais à quel prix ? ».'
     }
   ];
 
@@ -237,6 +197,7 @@
   if (currentIndex < 0) currentIndex = 0;
 
   var photo = photos[currentIndex];
+  var campaign = campaigns[photo.campaign];
   var previousPhoto = photos[(currentIndex - 1 + photos.length) % photos.length];
   var nextPhoto = photos[(currentIndex + 1) % photos.length];
 
@@ -244,23 +205,24 @@
   document.getElementById('photoDescription').content = photo.intro;
   document.getElementById('photoPageTitle').textContent = photo.title;
   document.getElementById('photoBreadcrumb').textContent = photo.title;
-  document.getElementById('photoCategory').textContent = photo.category;
-  document.getElementById('photoTheme').textContent = photo.theme;
+  document.getElementById('photoCategory').textContent = campaign.category;
+  document.getElementById('photoTheme').textContent = campaign.theme;
   document.getElementById('photoImage').src = photo.image;
   document.getElementById('photoImage').alt = photo.alt;
-  document.getElementById('photoEyebrow').textContent = photo.category;
+  document.getElementById('photoEyebrow').textContent = campaign.category;
   document.getElementById('photoTitle').textContent = photo.title;
   document.getElementById('photoIntro').textContent = photo.intro;
-  document.getElementById('photoSectionTitle').textContent = photo.storyTitle;
-  document.getElementById('photoStory1').textContent = photo.story1;
-  document.getElementById('photoStory2').textContent = photo.story2;
-  document.getElementById('photoClosing').textContent = photo.closing;
-  document.getElementById('photoFact1').firstChild.textContent = photo.facts[0] + ' ';
-  document.getElementById('photoFact2').firstChild.textContent = photo.facts[1] + ' ';
-  document.getElementById('photoFact3').firstChild.textContent = photo.facts[2] + ' ';
-  document.getElementById('photoTag1').textContent = photo.tags[0];
-  document.getElementById('photoTag2').textContent = photo.tags[1];
-  document.getElementById('photoTag3').textContent = photo.tags[2];
+  document.getElementById('photoSectionEyebrow').textContent = 'Réalisation associée';
+  document.getElementById('photoSectionTitle').textContent = campaign.storyTitle;
+  document.getElementById('photoStory1').textContent = campaign.story1;
+  document.getElementById('photoStory2').textContent = campaign.story2;
+  document.getElementById('photoClosing').textContent = campaign.closing;
+  document.getElementById('photoFact1').firstChild.textContent = campaign.facts[0] + ' ';
+  document.getElementById('photoFact2').firstChild.textContent = campaign.facts[1] + ' ';
+  document.getElementById('photoFact3').firstChild.textContent = campaign.facts[2] + ' ';
+  document.getElementById('photoTag1').textContent = campaign.tags[0];
+  document.getElementById('photoTag2').textContent = campaign.tags[1];
+  document.getElementById('photoTag3').textContent = campaign.tags[2];
 
   document.getElementById('previousPhoto').href = 'portfolio-single.html?photo=' + previousPhoto.id;
   document.getElementById('previousPhotoTitle').textContent = previousPhoto.title;
