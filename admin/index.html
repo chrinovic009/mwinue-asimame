@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Administration — Mwinue Asimame</title>
+  <link rel="icon" type="image/png" href="/img/icone.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/admin/admin.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ÉCRAN DE CHARGEMENT -->
+  <div id="screenBoot" class="screen screen-center">
+    <div class="text-center">
+      <img src="/img/logo-dark.png" alt="Mwinue Asimame" class="auth-logo mb-3">
+      <div class="spinner-border text-brand" role="status"><span class="visually-hidden">Chargement…</span></div>
+    </div>
+  </div>
+
+  <!-- PREMIÈRE CONNEXION : PERSONNALISATION OBLIGATOIRE DES IDENTIFIANTS -->
+  <div id="screenFirstSetup" class="screen screen-center auth-bg" hidden>
+    <form id="firstSetupForm" class="auth-card" autocomplete="off">
+      <div class="lock-icon mx-auto mb-3"><i class="bi bi-shield-lock"></i></div>
+      <h1 class="auth-title">Sécurisez votre compte</h1>
+      <p class="auth-sub">C’est votre première connexion. Remplacez l’adresse e-mail et le mot de passe par défaut, puis choisissez votre code PIN. Les identifiants par défaut ne fonctionneront plus ensuite.</p>
+      <div class="mb-3"><label class="form-label">Votre nom</label><input class="form-control" name="name" required maxlength="120"></div>
+      <div class="mb-3"><label class="form-label">Nouvelle adresse e-mail</label><input class="form-control" name="email" type="email" required autocomplete="username"></div>
+      <div class="row g-2">
+        <div class="col-sm-6 mb-3"><label class="form-label">Nouveau mot de passe</label><input class="form-control" name="password" type="password" minlength="8" required autocomplete="new-password"></div>
+        <div class="col-sm-6 mb-3"><label class="form-label">Confirmer</label><input class="form-control" name="password2" type="password" minlength="8" required autocomplete="new-password"></div>
+        <div class="col-sm-6 mb-3"><label class="form-label">Code PIN (4-6 chiffres)</label><input class="form-control pin-input" name="pin" type="password" inputmode="numeric" pattern="\d{4,6}" maxlength="6" required></div>
+        <div class="col-sm-6 mb-3"><label class="form-label">Confirmer le PIN</label><input class="form-control pin-input" name="pin2" type="password" inputmode="numeric" pattern="\d{4,6}" maxlength="6" required></div>
+      </div>
+      <p class="small text-muted">Mot de passe : 8 caractères minimum. Conseil : mélangez lettres, chiffres et symboles.</p>
+      <p class="form-error" data-error></p>
+      <button class="btn btn-brand w-100" type="submit">Enregistrer et accéder à l’administration</button>
+      <button class="btn btn-link w-100 mt-2 text-muted" type="button" data-action="logout">Annuler</button>
+    </form>
+  </div>
+
+  <!-- CONNEXION -->
+  <div id="screenLogin" class="screen screen-center auth-bg" hidden>
+    <form id="loginForm" class="auth-card">
+      <img src="/img/logo-dark.png" alt="Mwinue Asimame" class="auth-logo">
+      <h1 class="auth-title">Espace d'administration</h1>
+      <p class="auth-sub">Connectez-vous pour gérer le site de Mwinue Asimame.</p>
+      <div class="mb-3"><label class="form-label" for="loginEmail">E-mail</label><input class="form-control" id="loginEmail" name="email" type="email" autocomplete="username" required></div>
+      <div class="mb-3">
+        <label class="form-label" for="loginPassword">Mot de passe</label>
+        <div class="input-group">
+          <input class="form-control" id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+          <button class="btn btn-outline-secondary" type="button" data-toggle-password aria-label="Afficher le mot de passe"><i class="bi bi-eye"></i></button>
+        </div>
+      </div>
+      <p class="form-error" data-error></p>
+      <button class="btn btn-brand w-100" type="submit"><i class="bi bi-box-arrow-in-right me-2"></i>Se connecter</button>
+      <a href="/" class="d-block text-center small mt-3 text-muted">← Retour au site</a>
+    </form>
+  </div>
+
+  <!-- DÉFINITION DU PIN -->
+  <div id="screenPinSetup" class="screen screen-center auth-bg" hidden>
+    <form id="pinSetupForm" class="auth-card">
+      <div class="lock-icon mx-auto mb-3"><i class="bi bi-shield-lock"></i></div>
+      <h1 class="auth-title">Choisissez votre code PIN</h1>
+      <p class="auth-sub">Comme sur un téléphone, ce code de 4 à 6 chiffres déverrouille votre espace lorsqu'il est verrouillé.</p>
+      <div class="mb-3"><label class="form-label">Nouveau code PIN</label><input class="form-control form-control-lg text-center pin-input" name="pin" type="password" inputmode="numeric" pattern="\d{4,6}" maxlength="6" required></div>
+      <div class="mb-3"><label class="form-label">Confirmer le code PIN</label><input class="form-control form-control-lg text-center pin-input" name="pin2" type="password" inputmode="numeric" pattern="\d{4,6}" maxlength="6" required></div>
+      <p class="form-error" data-error></p>
+      <button class="btn btn-brand w-100" type="submit">Enregistrer le code PIN</button>
+    </form>
+  </div>
+
+  <!-- ÉCRAN DE VERROUILLAGE (style téléphone) -->
+  <div id="screenLock" class="screen lock-screen" hidden>
+    <div class="lock-top">
+      <div class="lock-time" id="lockTime">--:--</div>
+      <div class="lock-date" id="lockDate"></div>
+    </div>
+    <div class="lock-body">
+      <div class="lock-avatar" id="lockAvatar">MA</div>
+      <div class="lock-name" id="lockName">Mwinue Asimame</div>
+      <div class="lock-hint" id="lockHint">Saisissez votre code PIN</div>
+      <div class="pin-dots" id="pinDots" aria-live="polite"></div>
+      <div class="keypad" id="keypad">
+        <button type="button" data-key="1">1</button><button type="button" data-key="2">2<small>ABC</small></button><button type="button" data-key="3">3<small>DEF</small></button>
+        <button type="button" data-key="4">4<small>GHI</small></button><button type="button" data-key="5">5<small>JKL</small></button><button type="button" data-key="6">6<small>MNO</small></button>
+        <button type="button" data-key="7">7<small>PQRS</small></button><button type="button" data-key="8">8<small>TUV</small></button><button type="button" data-key="9">9<small>WXYZ</small></button>
+        <button type="button" data-key="ok" class="key-action" aria-label="Valider"><i class="bi bi-check-lg"></i></button><button type="button" data-key="0">0</button><button type="button" data-key="del" class="key-action" aria-label="Effacer"><i class="bi bi-backspace"></i></button>
+      </div>
+      <button type="button" class="lock-link" id="lockUsePassword">Utiliser mon mot de passe</button>
+    </div>
+  </div>
+
+  <!-- APPLICATION -->
+  <div id="screenApp" class="app" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <img src="/img/logo-white.png" alt="Mwinue Asimame">
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav" aria-label="Menu d'administration"></nav>
+      <div class="sidebar-foot">
+        <a href="/" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-2"></i>Voir le site</a>
+      </div>
+    </aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="btn btn-icon d-lg-none" id="menuToggle" aria-label="Ouvrir le menu"><i class="bi bi-list"></i></button>
+        <h1 class="topbar-title" id="pageTitle">Tableau de bord</h1>
+        <div class="global-search" id="globalSearch">
+          <i class="bi bi-search"></i>
+          <input type="search" id="globalSearchInput" class="form-control" placeholder="Rechercher partout…  ( / )" autocomplete="off" aria-label="Recherche globale" aria-controls="globalSearchResults">
+          <div class="global-results" id="globalSearchResults" role="listbox" hidden></div>
+        </div>
+        <button class="btn btn-icon d-md-none" id="searchToggle" aria-label="Rechercher"><i class="bi bi-search"></i></button>
+        <div class="topbar-actions">
+          <span class="existence-chip d-none d-md-inline-flex" id="existenceChip" title="Temps d'existence de l'association"><i class="bi bi-hourglass-split me-1"></i><span></span></span>
+          <button class="btn btn-icon" id="lockBtn" title="Verrouiller (Ctrl+Maj+L)" aria-label="Verrouiller"><i class="bi bi-lock-fill"></i></button>
+          <div class="dropdown">
+            <button class="btn user-chip dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="user-avatar" id="userAvatar">MA</span><span class="d-none d-sm-inline" id="userName"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header" id="userRole"></h6></li>
+              <li><a class="dropdown-item" href="#account"><i class="bi bi-person-gear me-2"></i>Mon compte</a></li>
+              <li><button class="dropdown-item" type="button" data-action="lock"><i class="bi bi-lock me-2"></i>Verrouiller</button></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item text-danger" type="button" data-action="logout"><i class="bi bi-box-arrow-right me-2"></i>Se déconnecter</button></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <main class="content" id="view" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <!-- MODALE D'ÉDITION -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-lg-down">
+      <form class="modal-content" id="editForm" novalidate>
+        <div class="modal-header">
+          <h5 class="modal-title" id="editTitle">Modifier</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body" id="editBody"></div>
+        <div class="modal-footer">
+          <p class="form-error me-auto mb-0" id="editError"></p>
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-brand" id="editSave"><i class="bi bi-check2 me-1"></i>Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE GÉNÉRIQUE -->
+  <div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="infoTitle"></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+        <div class="modal-body" id="infoBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toasts"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

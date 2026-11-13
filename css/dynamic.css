@@ -1,0 +1,73 @@
+/* =====================================================
+   MWAS — Styles des éléments dynamiques
+   ===================================================== */
+.hp-field { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; }
+.form-notice { color: var(--n-success, #8A6415); }
+.form-notice.is-error { color: #b42318; }
+.footer-contact { display: flex; flex-direction: column; gap: .35rem; }
+.footer-contact a, .footer-contact span { color: rgba(255,255,255,.7); text-decoration: none; }
+.footer-contact a:hover { color: #fff; }
+.partner-name { font-family: var(--n-font-display); font-weight: 700; font-size: .85rem; color: var(--n-navy); text-align: center; line-height: 1.2; }
+
+/* Barre d'interactions */
+.engage-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.1rem; padding: .85rem 1rem; border: 1px solid var(--n-border); border-radius: var(--n-radius-md); background: #fff; margin: 0 0 1.5rem; }
+.engage-stat { color: var(--n-slate); text-decoration: none; font-size: .92rem; display: inline-flex; align-items: center; gap: .35rem; }
+.engage-stat b, .engage-like b { color: var(--n-navy); font-weight: 700; }
+.engage-like { border: 1px solid var(--n-border); background: var(--n-bg); border-radius: 999px; padding: .35rem .9rem; font-size: .92rem; display: inline-flex; align-items: center; gap: .35rem; color: var(--n-navy); transition: all .2s; }
+.engage-like:hover { border-color: #e0245e; color: #e0245e; }
+.engage-like.is-liked { background: #fde7ee; border-color: #f4a3bd; color: #e0245e; }
+.engage-like.is-liked i { color: #e0245e; }
+.engage-like.pop i { animation: pop .4s; }
+@keyframes pop { 50% { transform: scale(1.45); } }
+.engage-share { display: inline-flex; align-items: center; gap: .35rem; }
+.engage-share a, .engage-share button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--n-border); background: #fff; color: var(--n-navy); display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.engage-share a:hover, .engage-share button:hover { background: var(--n-bg-alt); }
+.card-stats { display: flex; gap: .9rem; font-size: .8rem; color: var(--n-slate-light); margin-top: .6rem; }
+.card-stats i { margin-right: .2rem; }
+
+/* Commentaires */
+.comments-wrap { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--n-border); }
+.cmt-total { color: var(--n-slate-light); font-weight: 400; font-size: 1rem; }
+.cmt-form { background: var(--n-bg-alt); border-radius: var(--n-radius-md); padding: 1.2rem; margin-bottom: 1.5rem; }
+.cmt-form.is-reply { background: var(--n-bg); padding: .8rem; margin: .8rem 0 0; border: 1px solid var(--n-border); }
+.cmt { display: flex; gap: .8rem; padding: 1rem 0; border-bottom: 1px solid var(--n-border); }
+.cmt-reply { border-bottom: 0; padding: .8rem 0 0; }
+.cmt-replies { margin-left: .2rem; padding-left: 1rem; border-left: 2px solid var(--n-border); }
+.cmt-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--n-gradient-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+.cmt-staff > .cmt-avatar { background: #fff; border: 2px solid var(--n-primary); }
+.cmt-avatar img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.cmt-body { flex: 1; min-width: 0; }
+.cmt-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.cmt-badge { background: var(--n-primary); color: #fff; font-size: .68rem; font-weight: 600; padding: .15rem .5rem; border-radius: 999px; }
+.cmt-date { color: var(--n-slate-light); font-size: .8rem; }
+.cmt-text { white-space: pre-wrap; word-wrap: break-word; margin: .3rem 0 .4rem; color: var(--n-navy); }
+.cmt-actions { display: flex; gap: .8rem; }
+.cmt-actions button { background: none; border: 0; padding: 0; color: var(--n-slate); font-size: .82rem; }
+.cmt-actions button:hover, .cmt-actions .is-liked { color: #e0245e; }
+
+/* Compteur d'existence et impact */
+.existence-live { font-family: var(--n-font-display); font-size: .85rem; color: var(--n-slate); font-variant-numeric: tabular-nums; margin-top: .25rem; }
+.impact-section .impact-card { background: #fff; border: 1px solid var(--n-border); border-radius: var(--n-radius-lg); padding: 1.6rem; height: 100%; box-shadow: var(--n-shadow-sm); }
+.impact-gauge { position: relative; max-width: 260px; margin: 0 auto; }
+.impact-gauge-value { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.impact-gauge-value strong { font-family: var(--n-font-display); font-size: 2.4rem; color: var(--n-primary); line-height: 1; }
+.impact-gauge-value span { font-size: .85rem; color: var(--n-slate); }
+.impact-bar { margin-bottom: 1.1rem; }
+.impact-bar-head { display: flex; justify-content: space-between; gap: 1rem; font-size: .92rem; margin-bottom: .35rem; }
+.impact-bar-head strong { color: var(--n-navy); }
+.impact-track { height: 10px; border-radius: 999px; background: var(--n-bg-alt); overflow: hidden; }
+.impact-fill { height: 100%; border-radius: 999px; width: 0; transition: width 1.2s cubic-bezier(.2,.8,.2,1); }
+.impact-bar small { color: var(--n-slate-light); }
+
+/* Paiement */
+.payment-wait { text-align: center; padding: 1rem 0; }
+.payment-wait .spinner-border { width: 3rem; height: 3rem; color: var(--n-primary); }
+.payment-phone-field { margin-top: 1.25rem; text-align: left; }
+.payment-result-icon { width: 72px; height: 72px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2.2rem; margin-bottom: 1rem; }
+.payment-result-icon.ok { background: #e5f6ec; color: #11743b; }
+.payment-result-icon.ko { background: #fde8e6; color: #a1281b; }
+.currency-switch { display: inline-flex; border: 1px solid var(--n-border); border-radius: 999px; padding: 3px; margin-bottom: 1rem; background: #fff; }
+.currency-switch button { border: 0; background: none; padding: .35rem 1rem; border-radius: 999px; font-weight: 600; color: var(--n-slate); }
+.currency-switch button.is-active { background: var(--n-primary); color: #fff; }
+.skeleton { background: linear-gradient(90deg, #f3ece4 25%, #faf6f1 50%, #f3ece4 75%); background-size: 200% 100%; animation: sk 1.2s infinite; border-radius: 12px; }
+@keyframes sk { to { background-position: -200% 0; } }

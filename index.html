@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,6 +22,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <!-- Custom CSS -->
   <link href="css/custom.css" rel="stylesheet">
+  <link href="css/dynamic.css" rel="stylesheet">
 </head>
 <body>
 
@@ -76,7 +77,7 @@
             </div>
 
             <div>
-              <div class="stars mb-0" style="color:var(--n-accent); font-size:0.85rem;">★★★★★ <span class="text-navy fw-semibold">4.9/5</span></div>
+              <div class="stars mb-0" style="color:var(--n-accent); font-size:0.85rem;">★★★★★ <span class="text-navy fw-semibold" id="heroRating">4.9/5</span></div>
               <small class="text-slate">notre impact provincial</small>
             </div>
 
@@ -106,7 +107,7 @@
   <section class="py-4 bg-white border-bottom">
     <div class="container">
       <p class="text-center text-slate small fw-semibold text-uppercase mb-4" style="letter-spacing:0.1em;">Nos partenaires</p>
-      <div class="row align-items-center justify-content-center g-4">
+      <div class="row align-items-center justify-content-center g-4" data-partners>
         <div class="col-4 col-md-2"><a href="https://aulia-beta.vercel.app" target="_blank"><div class="logo-cloud-item"><img src="img/client/logo-aulia.png" alt="Aulia"></div></a></div>
       </div>
     </div>
@@ -163,52 +164,52 @@
     </div>
   </section>
 
-  <!-- ABOUT / WHY US -->
-  <section class="section">
+  <!-- DERNIÈRE ACTIVITÉ (gérée depuis l'administration) -->
+  <section class="section" id="latestActivity">
     <div class="container">
       <div class="row align-items-center g-5">
         <div class="col-lg-6 reveal">
           <div class="position-relative">
-            <img src="img/evenement/cancers-sensibilisation.png" class="rounded-img w-100" alt="Nexora team collaborating in office" style="aspect-ratio: 5/4; object-fit:cover;">
-            <div class="hero-float-badge badge-2 d-none d-sm-flex" style="position:absolute; bottom:-1.5rem; left:-1.5rem; right:auto;">
+            <img data-la="image" src="img/evenement/cancers-sensibilisation.png" class="rounded-img w-100" alt="Ensemble contre les cancers" style="aspect-ratio: 5/4; object-fit:cover;">
+            <div data-la="badge" class="hero-float-badge badge-2 d-none d-sm-flex" style="position:absolute; bottom:-1.5rem; left:-1.5rem; right:auto;">
               <div class="icon-box icon-box-primary" style="width:36px;height:36px;border-radius:10px;font-size:1.1rem;"><i class="bi bi-award"></i></div>
-              <div>Ensemble contre les cancers<br><small class="text-slate fw-normal">6 novembre 2026</small></div>
+              <div><span data-la="badge-title">Ensemble contre les cancers</span><br><small class="text-slate fw-normal" data-la="badge-date">6 novembre 2026</small></div>
             </div>
           </div>
         </div>
         <div class="col-lg-6 reveal">
-          <span class="eyebrow">Dernière activité</span>
-          <h2 class="section-title">Unis contre les cancers : de la sensibilisation à l'action</h2>
-          <p class="section-subtitle mb-4">Sous le haut patronage de Madame la Gouverneure du Lualaba, le Ministère Provincial de la Santé, Éducation, Affaires Sociales et Humanitaires, Genre, Famille et Enfant a organisé, le 6 novembre 2026, une matinée de sensibilisation consacrée à la prévention, au dépistage précoce et à la prise en charge des cancers.</p>
-          <ul class="list-check mb-4">
+          <span class="eyebrow" data-la="eyebrow">Dernière activité</span>
+          <h2 class="section-title" data-la="title">Unis contre les cancers : de la sensibilisation à l'action</h2>
+          <p class="section-subtitle mb-4" data-la="text">Sous le haut patronage de Madame la Gouverneure du Lualaba, le Ministère Provincial de la Santé, Éducation, Affaires Sociales et Humanitaires, Genre, Famille et Enfant a organisé, le 6 novembre 2026, une matinée de sensibilisation consacrée à la prévention, au dépistage précoce et à la prise en charge des cancers.</p>
+          <ul class="list-check mb-4" data-la="bullets">
             <li><i class="bi bi-check"></i><div><strong class="text-navy">Sensibilisation et prévention</strong> — échanges autour des différents types de cancers et de l'importance du dépistage précoce.</div></li>
             <li><i class="bi bi-check"></i><div><strong class="text-navy">Expertise médicale</strong> interventions de spécialistes sur les cancers pédiatriques, du sein, du col de l'utérus et de la prostate.</div></li>
-            <li><i class="bi bi-check"></i><div><strong class="text-navy">Accompagnement et information</strong> — plutte contre les fausses croyances, santé mentale et soutien psychosocial.</div></li>
+            <li><i class="bi bi-check"></i><div><strong class="text-navy">Accompagnement et information</strong> — lutte contre les fausses croyances, santé mentale et soutien psychosocial.</div></li>
           </ul>
-          <a href="services.html" class="btn btn-primary btn-lg-custom">Voir toutes nos activités</a>
+          <a href="services.html" class="btn btn-primary btn-lg-custom" data-la="button">Voir toutes nos activités</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- STATS STRIP -->
+  <!-- STATS STRIP (calculés automatiquement) -->
   <section class="stats-strip py-5 bg-white">
     <div class="container">
       <div class="row text-center g-4">
         <div class="col-6 col-md-3 stat-item reveal">
-          <div class="stat-number">9+</div>
-          <div class="stat-label">Mois d'existence</div>
+          <div class="stat-number" id="statExistence">9+</div>
+          <div class="stat-label" id="statExistenceLabel">Mois d'existence</div>
         </div>
         <div class="col-6 col-md-3 stat-item reveal">
-          <div class="stat-number">10+</div>
+          <div class="stat-number" id="statTeam">10+</div>
           <div class="stat-label">Membres de l'équipe</div>
         </div>
         <div class="col-6 col-md-3 stat-item reveal">
-          <div class="stat-number">+60%</div>
+          <div class="stat-number" id="statImpact">+60%</div>
           <div class="stat-label">D'impact</div>
         </div>
         <div class="col-6 col-md-3 stat-item reveal">
-          <div class="stat-number">4+</div>
+          <div class="stat-number" id="statActivities">4+</div>
           <div class="stat-label">Activités</div>
         </div>
       </div>
@@ -272,7 +273,7 @@
         </div>
       </div>
 
-      <div class="row g-4">
+      <div class="row g-4" id="homeRealisations">
         <div class="col-md-6 col-lg-4 reveal">
           <a href="portfolio-single.html" class="portfolio-card d-block">
             <img src="img/evenement/octobre/1.jpeg" alt="Octobre rose">
@@ -313,7 +314,7 @@
           <h2 class="section-title">Elles témoignent, leur voix inspire.</h2>
         </div>
       </div>
-      <div class="row g-4">
+      <div class="row g-4" id="homeTestimonials">
         <div class="col-md-6 col-lg-4 reveal">
           <div class="testimonial-card">
             <div class="stars">★★★★★</div>
@@ -364,6 +365,15 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVRE D'OR (commentaires sur le site) -->
+  <section class="section pb-0" id="livre-or">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-9" id="guestbook"></div>
       </div>
     </div>
   </section>
@@ -454,6 +464,10 @@
 
   <!-- Bootstrap Bundle JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/site.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/engage.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>

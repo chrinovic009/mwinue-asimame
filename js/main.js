@@ -32,8 +32,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ---------- Activity card flips ---------- */
-  document.querySelectorAll('.activity-flip').forEach(card => {
+  /* ---------- Activity card flips (réutilisable pour les cartes dynamiques) ---------- */
+  window.bindActivityFlip = function (card) {
+    if (card.dataset.flipBound) return;
+    card.dataset.flipBound = '1';
     const front = card.querySelector('.activity-flip-front');
     const back = card.querySelector('.activity-flip-back');
     let lastPointerType = null;
@@ -45,40 +47,20 @@ document.addEventListener('DOMContentLoaded', function () {
       back?.toggleAttribute('inert', !isFlipped);
     };
 
-    card.addEventListener('pointerdown', event => {
-      lastPointerType = event.pointerType;
-    });
-
-    card.addEventListener('pointerenter', event => {
-      if (event.pointerType === 'mouse') setFlipped(true);
-    });
-
-    card.addEventListener('pointerleave', () => {
-      if (!card.contains(document.activeElement)) setFlipped(false);
-    });
-
-    card.addEventListener('focusin', () => {
-      if (lastPointerType !== 'touch') setFlipped(true);
-    });
-
+    card.addEventListener('pointerdown', event => { lastPointerType = event.pointerType; });
+    card.addEventListener('pointerenter', event => { if (event.pointerType === 'mouse') setFlipped(true); });
+    card.addEventListener('pointerleave', () => { if (!card.contains(document.activeElement)) setFlipped(false); });
+    card.addEventListener('focusin', () => { if (lastPointerType !== 'touch') setFlipped(true); });
     card.addEventListener('focusout', event => {
-      if (!card.contains(event.relatedTarget) && !card.matches(':hover')) {
-        setFlipped(false);
-      }
+      if (!card.contains(event.relatedTarget) && !card.matches(':hover')) setFlipped(false);
     });
-
-    front?.addEventListener('keydown', () => {
-      lastPointerType = 'keyboard';
-    });
-
+    front?.addEventListener('keydown', () => { lastPointerType = 'keyboard'; });
     front?.addEventListener('click', event => {
-      if (event.pointerType === 'mouse' || event.detail === 0) {
-        setFlipped(true);
-      } else {
-        setFlipped(!card.classList.contains('is-flipped'));
-      }
+      if (event.pointerType === 'mouse' || event.detail === 0) setFlipped(true);
+      else setFlipped(!card.classList.contains('is-flipped'));
     });
-  });
+  };
+  document.querySelectorAll('.activity-flip').forEach(card => window.bindActivityFlip(card));
 
   /* ---------- Mobile menu toggle animation ---------- */
   const toggler = document.querySelector('.navbar-toggler-custom');
@@ -145,31 +127,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ---------- Bootstrap form validation UI ---------- */
+  /* ---------- Formulaires : validation puis envoi réel (newsletter / contact) ---------- */
   document.querySelectorAll('.needs-validation').forEach(form => {
     form.addEventListener('submit', function (e) {
+      e.preventDefault();
       if (!form.checkValidity()) {
-        e.preventDefault();
         e.stopPropagation();
-      } else {
-        e.preventDefault();
-        const btn = form.querySelector('button[type="submit"]');
-        if (btn) {
-          const original = btn.innerHTML;
-          btn.innerHTML = 'Sending...';
-          btn.disabled = true;
-          setTimeout(() => {
-            btn.innerHTML = 'Message sent ✓';
-            setTimeout(() => {
-              btn.innerHTML = original;
-              btn.disabled = false;
-              form.reset();
-              form.classList.remove('was-validated');
-            }, 2200);
-          }, 1000);
-        }
+        form.classList.add('was-validated');
+        return;
       }
       form.classList.add('was-validated');
+      if (window.MWAS && window.MWAS.submitForm) window.MWAS.submitForm(form);
     }, false);
   });
 

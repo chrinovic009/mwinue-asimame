@@ -13,6 +13,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="css/custom.css" rel="stylesheet">
   <link href="css/donate.css" rel="stylesheet">
+  <link href="css/dynamic.css" rel="stylesheet">
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-nexora fixed-top">
@@ -75,11 +76,14 @@
               <div class="donor-name-field" id="donorNameField" hidden>
                 <label class="form-label" for="donorName">Votre nom</label>
                 <input class="form-control" id="donorName" name="donorName" type="text" autocomplete="name" maxlength="100" placeholder="Nom et prénom">
+                <label class="form-label mt-2" for="donorEmail">E-mail pour le reçu (facultatif)</label>
+                <input class="form-control" id="donorEmail" name="donorEmail" type="email" autocomplete="email" maxlength="200" placeholder="vous@exemple.com">
               </div>
             </fieldset>
 
             <fieldset class="amount-choice">
               <legend>Choisissez ou saisissez un montant</legend>
+              <div class="currency-switch" role="group" aria-label="Devise"><button type="button" class="is-active" data-currency="CDF">Francs congolais (FC)</button><button type="button" data-currency="USD">Dollars (USD)</button></div>
               <div class="donate-amount-options" aria-label="Montants suggérés">
                 <button type="button" class="donate-amount-option" data-amount="10000">10 000 FC</button>
                 <button type="button" class="donate-amount-option" data-amount="25000">25 000 FC</button>
@@ -88,11 +92,11 @@
               </div>
               <label class="visually-hidden" for="donationAmount">Montant libre en francs congolais</label>
               <div class="donate-custom-amount">
-                <span aria-hidden="true">FC</span>
-                <input id="donationAmount" name="amount" type="number" inputmode="numeric" min="10000" step="1" placeholder="Autre montant" required aria-describedby="amountHelp amountError">
+                <span aria-hidden="true" id="currencySymbol">FC</span>
+                <input id="donationAmount" name="amount" type="number" inputmode="decimal" min="1" step="1" placeholder="Autre montant" required aria-describedby="amountHelp amountError">
               </div>
-              <p class="donate-help" id="amountHelp">Montant libre, à partir de 10 000 FC.</p>
-              <p class="donate-error" id="amountError" role="alert" hidden>Veuillez saisir un montant valide d’au moins 10 000 FC.</p>
+              <p class="donate-help" id="amountHelp">Montant libre, à partir de 1 000 FC.</p>
+              <p class="donate-error" id="amountError" role="alert" hidden>Veuillez saisir un montant valide.</p>
             </fieldset>
 
             <label class="donate-purpose-label" for="donationPurpose">Je souhaite soutenir en priorité (facultatif)</label>
@@ -130,24 +134,41 @@
               <i class="bi bi-check-circle-fill network-check" aria-hidden="true"></i>
             </button>
           </div>
+          <div class="payment-phone-field">
+            <label class="form-label fw-semibold" for="payPhone">Numéro Mobile Money qui va payer</label>
+            <input class="form-control form-control-lg" id="payPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ex. 0812345678" maxlength="16">
+            <p class="donate-help mb-0">Vous recevrez une demande de confirmation sur ce téléphone. Validez-la avec votre code secret <strong>uniquement sur votre téléphone</strong>.</p>
+          </div>
+          <input type="text" id="donWebsite" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
           <p class="donate-error" id="networkError" role="alert" hidden>Veuillez choisir un réseau pour continuer.</p>
           <div class="donate-step-actions">
             <button type="button" class="donate-back-button" data-previous-step="1"><i class="bi bi-arrow-left me-2" aria-hidden="true"></i>Retour</button>
-            <button type="button" class="btn donate-next-button" id="continuePayment">Continuer <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></button>
+            <button type="button" class="btn donate-next-button" id="continuePayment">Payer maintenant <i class="bi bi-lock-fill ms-2" aria-hidden="true"></i></button>
           </div>
         </section>
 
         <section data-donation-step="3" hidden aria-labelledby="paymentStatusTitle">
-          <div class="donate-heading">
-            <span class="payment-status-icon"><i class="bi bi-info-circle" aria-hidden="true"></i></span>
-            <h2 id="paymentStatusTitle">Paiement Mobile Money non connecté</h2>
-            <p>Vous avez sélectionné <strong id="selectedNetwork"></strong> pour un don de <strong id="finalAmount"></strong>.</p>
+          <div class="donate-heading" id="paymentPending">
+            <div class="payment-wait"><div class="spinner-border" role="status"></div></div>
+            <h2 id="paymentStatusTitle">Confirmez le paiement sur votre téléphone</h2>
+            <p id="paymentPendingText">Une demande de paiement de <strong id="finalAmount"></strong> via <strong id="selectedNetwork"></strong> vous a été envoyée.</p>
+            <p class="donate-help">Ne fermez pas cette page. La confirmation s’affichera automatiquement. Référence : <code id="paymentRef"></code></p>
           </div>
-          <div class="payment-notice" role="status">
-            <p><strong>Aucun transfert n’a été initié.</strong> Le paiement en ligne de l’association n’est pas encore configuré. Une intégration officielle avec l’opérateur ou un prestataire agréé est nécessaire pour lancer et confirmer une transaction.</p>
-            <p class="mb-0">Ne saisissez et ne communiquez votre code PIN sur aucun formulaire de ce site. Pour connaître les moyens de soutenir Mwinue Asimame, contactez-nous à <a href="mailto:contact@mwinue-asimame.org">contact@mwinue-asimame.org</a> ou au <a href="tel:+243819580061">+243 819 580 061</a>.</p>
+          <div class="donate-heading" id="paymentSuccess" hidden>
+            <span class="payment-result-icon ok"><i class="bi bi-check-lg"></i></span>
+            <h2>Merci pour votre don !</h2>
+            <p>Votre paiement de <strong id="successAmount"></strong> a été confirmé. Grâce à vous, Mwinue Asimame peut poursuivre ses actions en faveur des femmes.</p>
+            <a href="index.html" class="btn donate-next-button mt-2">Retour à l’accueil</a>
           </div>
-          <button type="button" class="donate-back-button mt-4" data-previous-step="2"><i class="bi bi-arrow-left me-2" aria-hidden="true"></i>Choisir un autre réseau</button>
+          <div class="donate-heading" id="paymentFailed" hidden>
+            <span class="payment-result-icon ko"><i class="bi bi-x-lg"></i></span>
+            <h2>Le paiement n’a pas abouti</h2>
+            <p id="paymentFailedText">La transaction a été refusée ou annulée. Aucun montant n’a été débité.</p>
+            <button type="button" class="btn donate-next-button mt-2" data-previous-step="2">Réessayer</button>
+          </div>
+          <div class="payment-notice mt-3" role="note">
+            <p class="mb-0"><i class="bi bi-shield-check me-1"></i>Ce site ne vous demandera jamais votre code PIN Mobile Money. Pour toute question : <a href="mailto:contact@mwinue-asimame.org">contact@mwinue-asimame.org</a> · <a href="tel:+243819580061" data-site="phone1">+243 819 580 061</a>.</p>
+          </div>
         </section>
         <p class="donate-status visually-hidden" id="donationStatus" role="status" aria-live="polite"></p>
       </section>
@@ -156,6 +177,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/site.js"></script>
   <script src="js/main.js"></script>
   <script src="js/donate.js"></script>
 </body>

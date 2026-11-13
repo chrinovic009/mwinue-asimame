@@ -1,0 +1,14 @@
+{
+  "name": "mwas-mwinue-asimame",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Site de l'association Mwinue Asimame avec interface d'administration, base de données Supabase et dons Mobile Money (FlexPay).",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node serveur-local.js",
+    "check": "node -e \"['./api/public','./api/admin','./api/auth','./api/donate','./api/donate-callback'].forEach(require); console.log('API OK')\""
+  }
+}

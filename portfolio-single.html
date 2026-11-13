@@ -12,6 +12,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="css/custom.css" rel="stylesheet">
+  <link href="css/dynamic.css" rel="stylesheet">
 </head>
 <body>
 
@@ -51,8 +52,8 @@
       <!-- PROJECT META -->
       <div class="row g-4 mb-5 reveal">
         <div class="col-md-3 col-6">
-          <small class="text-slate-light text-uppercase fw-semibold" style="letter-spacing:0.08em; font-size:0.75rem;">Initiative</small>
-          <p class="fw-semibold text-navy mb-0">Mwinue Asimame</p>
+          <small class="text-slate-light text-uppercase fw-semibold" style="letter-spacing:0.08em; font-size:0.75rem;">Rôle de Mwinue Asimame</small>
+          <p class="fw-semibold text-navy mb-0" id="photoRole">Organisation : Mwinue Asimame</p>
         </div>
         <div class="col-md-3 col-6">
           <small class="text-slate-light text-uppercase fw-semibold" style="letter-spacing:0.08em; font-size:0.75rem;">Domaine</small>
@@ -80,6 +81,35 @@
           <h2 class="mb-3" id="photoSectionTitle">Informer, échanger et agir</h2>
           <p class="mb-3" id="photoStory1">À travers ses initiatives, Mwinue Asimame crée des espaces de rencontre et de partage autour des enjeux qui touchent les femmes.</p>
           <p class="mb-4" id="photoStory2">Chaque image de cette galerie illustre un moment de sensibilisation, d’échange ou de renforcement des capacités, en lien avec la santé, les droits ou l’autonomisation.</p>
+          <div id="photoRibbonsSection" class="mb-4" hidden>
+            <h3 class="h5 mb-3">3 mois · 3 couleurs · 1 même engagement</h3>
+            <div class="d-flex flex-wrap gap-4">
+              <div class="text-center">
+                <svg class="mb-2" width="38" height="48" viewBox="0 0 24 32" role="img" aria-labelledby="goldRibbonTitle">
+                  <title id="goldRibbonTitle">Ruban or — septembre en or</title>
+                  <path fill="#d4a017" fill-rule="evenodd" d="M12 1C6.5 1 3 4.8 3 10c0 3.2 2.4 5.8 5.4 8.6L12 22l3.6-3.4C18.6 15.8 21 13.2 21 10c0-5.2-3.5-9-9-9Zm0 3c3.8 0 5.5 2 5.5 5.3 0 2.4-2.5 4.8-5.5 7.6-3-2.8-5.5-5.2-5.5-7.6C6.5 6 8.2 4 12 4Z"/>
+                  <path fill="#d4a017" d="m8.6 18.2 3.4 3.1 3.4-3.1 4.2 10.2-6.2-2.1-3.8 4.5L5.4 30Z"/>
+                </svg>
+                <span class="d-block small">Septembre en or</span>
+              </div>
+              <div class="text-center">
+                <svg class="mb-2" width="38" height="48" viewBox="0 0 24 32" role="img" aria-labelledby="pinkRibbonTitle">
+                  <title id="pinkRibbonTitle">Ruban rose — octobre rose</title>
+                  <path fill="#d63384" fill-rule="evenodd" d="M12 1C6.5 1 3 4.8 3 10c0 3.2 2.4 5.8 5.4 8.6L12 22l3.6-3.4C18.6 15.8 21 13.2 21 10c0-5.2-3.5-9-9-9Zm0 3c3.8 0 5.5 2 5.5 5.3 0 2.4-2.5 4.8-5.5 7.6-3-2.8-5.5-5.2-5.5-7.6C6.5 6 8.2 4 12 4Z"/>
+                  <path fill="#d63384" d="m8.6 18.2 3.4 3.1 3.4-3.1 4.2 10.2-6.2-2.1-3.8 4.5L5.4 30Z"/>
+                </svg>
+                <span class="d-block small">Octobre rose</span>
+              </div>
+              <div class="text-center">
+                <svg class="mb-2" width="38" height="48" viewBox="0 0 24 32" role="img" aria-labelledby="blueRibbonTitle">
+                  <title id="blueRibbonTitle">Ruban bleu — novembre bleu</title>
+                  <path fill="#0d6efd" fill-rule="evenodd" d="M12 1C6.5 1 3 4.8 3 10c0 3.2 2.4 5.8 5.4 8.6L12 22l3.6-3.4C18.6 15.8 21 13.2 21 10c0-5.2-3.5-9-9-9Zm0 3c3.8 0 5.5 2 5.5 5.3 0 2.4-2.5 4.8-5.5 7.6-3-2.8-5.5-5.2-5.5-7.6C6.5 6 8.2 4 12 4Z"/>
+                  <path fill="#0d6efd" d="m8.6 18.2 3.4 3.1 3.4-3.1 4.2 10.2-6.2-2.1-3.8 4.5L5.4 30Z"/>
+                </svg>
+                <span class="d-block small">Novembre bleu</span>
+              </div>
+            </div>
+          </div>
           <div id="photoSpeakersSection" class="mb-4" hidden>
             <h3 class="h5 mb-2">Intervenants et accompagnement</h3>
             <ul id="photoSpeakers" class="mb-0"></ul>
@@ -186,7 +216,9 @@
   <button class="back-to-top" aria-label="Back to top"><i class="bi bi-arrow-up"></i></button>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/site.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/photo.js"></script>
   <script src="js/portfolio-single.js"></script>
 </body>
 </html>
