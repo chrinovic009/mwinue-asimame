@@ -1,0 +1,126 @@
+/* =====================================================
+   MWAS — Section campagne « 16 jours d'activisme contre les VBG »
+   ===================================================== */
+.campaign-vbg {
+  --cv-orange: #E8611A;
+  --cv-gold: #F2B72C;
+  --cv-terra: #A5481D;
+  --cv-ink: #32180F;
+  position: relative; overflow: hidden; isolation: isolate;
+  padding: clamp(4rem, 8vw, 6.5rem) 0;
+  background: var(--cv-ink); color: #fff;
+}
+.campaign-vbg .cv-deco { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.campaign-vbg .cv-deco::before {
+  content: ""; position: absolute; width: 760px; height: 760px; right: -220px; top: -260px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 97, 26, .42) 0%, rgba(232, 97, 26, 0) 65%);
+}
+.campaign-vbg .cv-deco::after {
+  content: ""; position: absolute; width: 520px; height: 520px; left: -200px; bottom: -240px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 183, 44, .22) 0%, rgba(242, 183, 44, 0) 65%);
+}
+.campaign-vbg .cv-rings { position: absolute; right: 6%; top: 50%; width: 560px; height: 560px; transform: translateY(-50%); opacity: .14; }
+.campaign-vbg .cv-rings span { position: absolute; inset: 0; border-radius: 50%; border: 2px dashed var(--cv-gold); animation: cv-spin 60s linear infinite; }
+.campaign-vbg .cv-rings span:nth-child(2) { inset: 70px; animation-direction: reverse; animation-duration: 45s; border-style: solid; border-color: var(--cv-orange); }
+.campaign-vbg .cv-rings span:nth-child(3) { inset: 150px; animation-duration: 30s; }
+
+/* Étiquette d'état */
+.campaign-vbg .cv-status {
+  display: inline-flex; align-items: center; gap: .55rem; padding: .45rem 1rem .45rem .5rem; border-radius: 999px;
+  background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .18); font-weight: 600; font-size: .85rem; letter-spacing: .04em;
+}
+.campaign-vbg .cv-status .cv-ribbon { width: 28px; height: 28px; border-radius: 50%; background: var(--cv-orange); display: inline-flex; align-items: center; justify-content: center; }
+.campaign-vbg .cv-status .cv-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cv-gold); box-shadow: 0 0 0 0 rgba(242, 183, 44, .7); animation: cv-pulse 1.8s infinite; }
+.campaign-vbg h2 { color: #fff; font-family: var(--n-font-display, 'Sora', sans-serif); font-weight: 800; font-size: clamp(2rem, 4.2vw, 3.1rem); line-height: 1.08; letter-spacing: -.02em; margin: 1.1rem 0 1rem; }
+.campaign-vbg h2 .cv-hl { background: linear-gradient(90deg, var(--cv-gold), var(--cv-orange)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.campaign-vbg .cv-lead { color: rgba(255, 241, 214, .82); font-size: 1.05rem; line-height: 1.65; max-width: 560px; }
+
+/* Frise des 16 jours */
+.campaign-vbg .cv-timeline { margin: 1.6rem 0 1.4rem; max-width: 560px; }
+.campaign-vbg .cv-dates { display: flex; justify-content: space-between; font-size: .8rem; color: rgba(255, 241, 214, .7); margin-bottom: .5rem; letter-spacing: .03em; }
+.campaign-vbg .cv-dates strong { color: #fff; }
+.campaign-vbg .cv-days { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 4px; }
+.campaign-vbg .cv-days span { height: 10px; border-radius: 3px; background: rgba(255, 255, 255, .14); transition: background .4s; }
+.campaign-vbg .cv-days span.is-done { background: linear-gradient(90deg, var(--cv-orange), var(--cv-gold)); }
+.campaign-vbg .cv-days span.is-today { background: var(--cv-gold); box-shadow: 0 0 12px rgba(242, 183, 44, .9); animation: cv-blink 1.4s ease-in-out infinite; }
+.campaign-vbg .cv-count { margin-top: .55rem; font-size: .88rem; color: var(--cv-gold); font-weight: 600; }
+
+/* Les 6 formes */
+.campaign-vbg .cv-forms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; margin-bottom: 1.6rem; max-width: 600px; }
+.campaign-vbg .cv-form {
+  display: flex; align-items: center; gap: .55rem; padding: .6rem .7rem; border-radius: 14px;
+  background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .12); font-size: .86rem; font-weight: 600; line-height: 1.2;
+  transition: transform .25s, background .25s, border-color .25s;
+}
+.campaign-vbg .cv-form:hover { transform: translateY(-3px); background: rgba(232, 97, 26, .18); border-color: rgba(232, 97, 26, .6); }
+.campaign-vbg .cv-form i { width: 30px; height: 30px; flex-shrink: 0; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; background: var(--cv-orange); color: #fff; font-size: .95rem; }
+.campaign-vbg .cv-form:nth-child(even) i { background: var(--cv-terra); }
+
+/* Engagement Former · Éveiller · Promouvoir */
+.campaign-vbg .cv-pledge { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1.9rem; max-width: 600px; }
+.campaign-vbg .cv-pledge div { border-top: 2px solid var(--cv-orange); padding-top: .7rem; }
+.campaign-vbg .cv-pledge strong { display: block; font-family: var(--n-font-display, 'Sora', sans-serif); font-size: 1rem; color: var(--cv-gold); margin-bottom: .2rem; }
+.campaign-vbg .cv-pledge span { font-size: .85rem; color: rgba(255, 241, 214, .75); line-height: 1.45; }
+
+.campaign-vbg .cv-actions { display: flex; flex-wrap: wrap; gap: .7rem; }
+.campaign-vbg .cv-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .8rem 1.3rem; border-radius: 999px; font-weight: 700; text-decoration: none; border: 0; transition: transform .2s, box-shadow .2s, background .2s; }
+.campaign-vbg .cv-btn:hover { transform: translateY(-2px); }
+.campaign-vbg .cv-btn-primary { background: var(--cv-orange); color: #fff; box-shadow: 0 12px 28px rgba(232, 97, 26, .4); }
+.campaign-vbg .cv-btn-primary:hover { color: #fff; background: #d4550f; }
+.campaign-vbg .cv-btn-ghost { background: rgba(255, 255, 255, .08); color: #fff; border: 1px solid rgba(255, 255, 255, .25); }
+.campaign-vbg .cv-btn-ghost:hover { color: #fff; background: rgba(255, 255, 255, .16); }
+.campaign-vbg .cv-tags { margin-top: 1.2rem; font-size: .85rem; color: rgba(255, 241, 214, .6); letter-spacing: .02em; }
+
+/* Affiche mise en scène */
+.campaign-vbg .cv-stage { position: relative; max-width: 470px; margin: 0 auto; perspective: 1400px; }
+.campaign-vbg .cv-poster {
+  position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in;
+  border-radius: 18px; transform: rotate(3deg); transform-style: preserve-3d;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, .55), 0 0 0 8px rgba(255, 255, 255, .06);
+  transition: transform .6s cubic-bezier(.2, .8, .2, 1), box-shadow .6s;
+  animation: cv-float 6s ease-in-out infinite;
+}
+.campaign-vbg .cv-poster img { display: block; width: 100%; height: auto; border-radius: 18px; }
+.campaign-vbg .cv-poster::after { /* reflet */
+  content: ""; position: absolute; inset: 0; border-radius: 18px; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, .22) 50%, rgba(255, 255, 255, 0) 65%);
+  background-size: 250% 100%; background-position: 120% 0; animation: cv-shine 5s ease-in-out infinite;
+}
+.campaign-vbg .cv-poster:hover { transform: rotate(0deg) scale(1.02); box-shadow: 0 50px 90px rgba(0, 0, 0, .6), 0 0 0 8px rgba(242, 183, 44, .35); animation-play-state: paused; }
+.campaign-vbg .cv-poster:focus-visible { outline: 3px solid var(--cv-gold); outline-offset: 6px; }
+.campaign-vbg .cv-back { position: absolute; inset: 6% -6% -4% 8%; border-radius: 22px; background: linear-gradient(135deg, var(--cv-orange), var(--cv-terra)); transform: rotate(-5deg); z-index: -1; opacity: .9; }
+.campaign-vbg .cv-sticker {
+  position: absolute; left: -26px; top: 34px; z-index: 2; width: 112px; height: 112px; border-radius: 50%;
+  background: var(--cv-gold); color: var(--cv-ink); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  font-family: var(--n-font-display, 'Sora', sans-serif); font-weight: 800; line-height: 1; box-shadow: 0 14px 30px rgba(0, 0, 0, .35); transform: rotate(-12deg);
+}
+.campaign-vbg .cv-sticker b { font-size: 2.2rem; }
+.campaign-vbg .cv-sticker small { font-size: .62rem; letter-spacing: .08em; margin-top: .2rem; }
+.campaign-vbg .cv-zoom { position: absolute; right: 16px; bottom: 16px; z-index: 2; background: rgba(50, 24, 15, .78); color: #fff; border-radius: 999px; padding: .4rem .8rem; font-size: .78rem; font-weight: 600; pointer-events: none; backdrop-filter: blur(6px); }
+
+/* Visionneuse */
+.cv-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(20, 9, 4, .92); display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; }
+.cv-lightbox.is-open { opacity: 1; visibility: visible; }
+.cv-lightbox img { max-width: 100%; max-height: 100%; border-radius: 12px; box-shadow: 0 30px 80px rgba(0, 0, 0, .6); transform: scale(.94); transition: transform .35s; }
+.cv-lightbox.is-open img { transform: none; }
+.cv-lightbox button { position: absolute; top: 1rem; right: 1rem; width: 46px; height: 46px; border-radius: 50%; border: 0; background: #fff; color: #32180F; font-size: 1.3rem; }
+
+@keyframes cv-spin { to { transform: rotate(360deg); } }
+@keyframes cv-pulse { 0% { box-shadow: 0 0 0 0 rgba(242, 183, 44, .7); } 70% { box-shadow: 0 0 0 10px rgba(242, 183, 44, 0); } 100% { box-shadow: 0 0 0 0 rgba(242, 183, 44, 0); } }
+@keyframes cv-blink { 50% { opacity: .55; } }
+@keyframes cv-float { 0%, 100% { transform: rotate(3deg) translateY(0); } 50% { transform: rotate(2deg) translateY(-12px); } }
+@keyframes cv-shine { 0%, 60% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
+
+@media (max-width: 991.98px) {
+  .campaign-vbg .cv-stage { max-width: 360px; margin-bottom: 1rem; }
+  .campaign-vbg .cv-sticker { left: -10px; width: 92px; height: 92px; }
+  .campaign-vbg .cv-sticker b { font-size: 1.8rem; }
+}
+@media (max-width: 575.98px) {
+  .campaign-vbg .cv-forms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .campaign-vbg .cv-pledge { grid-template-columns: 1fr; gap: .8rem; }
+  .campaign-vbg .cv-actions .cv-btn { flex: 1 1 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .campaign-vbg *, .campaign-vbg *::after { animation: none !important; }
+}
