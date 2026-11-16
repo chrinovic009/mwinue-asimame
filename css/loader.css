@@ -1,0 +1,102 @@
+/* =====================================================
+   MWAS — Écran de chargement animé (logo « qui prend vie »)
+   ===================================================== */
+html.ml-loading { overflow: hidden; }
+html.ml-loading::before { content: ""; position: fixed; inset: 0; z-index: 9998; background: #2a140c; } /* évite tout flash avant l'injection */
+
+#mwas-loader {
+  --ml-gold: #F2B72C;
+  --ml-gold-2: #FFD979;
+  --ml-terra: #A5481D;
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(60% 55% at 50% 45%, rgba(165, 72, 29, .55) 0%, rgba(165, 72, 29, 0) 70%),
+    radial-gradient(120% 90% at 50% 110%, #5a2611 0%, #2a140c 60%);
+  color: #fff; overflow: hidden;
+  transition: opacity .8s ease, visibility .8s ease, clip-path .9s cubic-bezier(.7, 0, .2, 1);
+  clip-path: circle(150% at 50% 45%);
+}
+#mwas-loader.ml-out { clip-path: circle(0% at 50% 42%); opacity: .6; visibility: hidden; }
+#mwas-loader.ml-out.ml-quick { clip-path: circle(150% at 50% 45%); opacity: 0; transition-duration: .45s; }
+#mwas-loader .ml-stage { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1rem; }
+
+/* Halo solaire derrière le logo */
+#mwas-loader .ml-glow {
+  position: absolute; left: 50%; top: 0; width: min(78vw, 420px); aspect-ratio: 1; transform: translate(-50%, -4%) scale(.4);
+  border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, rgba(255, 217, 121, .55) 0%, rgba(242, 183, 44, .22) 38%, rgba(242, 183, 44, 0) 68%);
+  animation: ml-glow-in 1.4s .5s cubic-bezier(.2, .8, .2, 1) forwards, ml-breathe 3.2s 2s ease-in-out infinite;
+}
+#mwas-loader .ml-rays {
+  position: absolute; left: 50%; top: 0; width: min(92vw, 520px); aspect-ratio: 1; transform: translate(-50%, -12%); opacity: 0;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 217, 121, .10) 0deg 4deg, transparent 4deg 18deg);
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 62%); mask: radial-gradient(circle, #000 18%, transparent 62%);
+  --to: .9; animation: ml-fade-to 1.2s 1.3s ease forwards, ml-spin 40s linear infinite;
+}
+
+/* Logo vectorisé par couches */
+#mwas-loader .ml-logo { position: relative; width: min(62vw, 300px); aspect-ratio: 1; }
+#mwas-loader .ml-logo svg { width: 100%; height: 100%; overflow: visible; display: block; }
+#mwas-loader .ml-body { opacity: 0; transform: translateY(46px); transform-box: view-box; animation: ml-rise 1.3s .65s cubic-bezier(.16, .9, .25, 1) forwards; }
+#mwas-loader .ml-reveal { transform-box: view-box; transform-origin: 250px 395px; transform: scaleY(0); animation: ml-reveal 1.3s .65s cubic-bezier(.16, .9, .25, 1) forwards; }
+#mwas-loader .ml-hand { opacity: 0; transform-box: view-box; }
+#mwas-loader .ml-hand-l { transform-origin: 108px 300px; transform: translateY(60px) rotate(-26deg); animation: ml-hand-l 2.8s .9s cubic-bezier(.37, 0, .18, 1) forwards, ml-praise-l 6s 3.7s ease-in-out infinite; }
+#mwas-loader .ml-hand-r { transform-origin: 398px 300px; transform: translateY(60px) rotate(26deg); animation: ml-hand-r 2.8s 1.05s cubic-bezier(.37, 0, .18, 1) forwards, ml-praise-r 6s 3.85s ease-in-out infinite; }
+#mwas-loader .ml-arc-draw { fill: none; stroke: url(#mlGold); stroke-width: 13; stroke-linecap: round; stroke-dasharray: 520; stroke-dashoffset: 520; animation: ml-draw 1s .15s cubic-bezier(.6, 0, .2, 1) forwards, ml-fade-to-0 .5s 1.55s ease forwards; }
+#mwas-loader .ml-arc-shine { fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 40 600; stroke-dashoffset: 40; opacity: 0; animation: ml-shine 2.6s 2.2s ease-in-out infinite; }
+#mwas-loader .ml-leaf { transform-box: view-box; transform-origin: 196px 178px; animation: ml-leaf 2.6s 2.2s ease-in-out infinite; }
+#mwas-loader .ml-earring { transform-box: view-box; transform-origin: 224px 214px; animation: ml-swing 2.8s 2.1s ease-in-out infinite; }
+
+/* Étincelles « Éveiller » */
+#mwas-loader .ml-spark { fill: var(--ml-gold-2); opacity: 0; transform-box: fill-box; transform-origin: center; animation: ml-spark 2.4s ease-in-out infinite; }
+
+/* Nom et devise */
+#mwas-loader .ml-name { margin-top: .4rem; font-family: var(--n-font-display, 'Sora', 'Segoe UI', sans-serif); font-weight: 600; font-size: clamp(1.25rem, 5.4vw, 2rem); letter-spacing: .32em; text-indent: .32em; white-space: nowrap; }
+#mwas-loader .ml-name span { display: inline-block; opacity: 0; transform: translateY(14px); filter: blur(6px); animation: ml-letter .6s cubic-bezier(.2, .8, .2, 1) forwards; }
+#mwas-loader .ml-tag { margin-top: .55rem; font-size: clamp(.8rem, 3.2vw, .98rem); letter-spacing: .14em; color: rgba(255, 241, 214, .82); }
+#mwas-loader .ml-tag span { display: inline-block; opacity: 0; transform: translateY(8px); animation: ml-word .6s ease forwards; margin: 0 .25em; }
+#mwas-loader .ml-tag span:nth-child(1) { animation-delay: 3.6s; }
+#mwas-loader .ml-tag span:nth-child(2) { animation-delay: 3.9s; color: var(--ml-gold-2); }
+#mwas-loader .ml-tag span:nth-child(3) { animation-delay: 4.2s; }
+#mwas-loader .ml-bar { margin-top: 1.4rem; width: 140px; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, .14); overflow: hidden; opacity: 0; animation: ml-fade-to .4s 1s forwards; }
+#mwas-loader .ml-bar i { display: block; height: 100%; width: 40%; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--ml-gold), transparent); animation: ml-bar 1.3s ease-in-out infinite; }
+#mwas-loader .ml-skip { position: absolute; bottom: max(1.2rem, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: none; border: 0; color: rgba(255, 255, 255, .55); font-size: .8rem; letter-spacing: .08em; opacity: 0; animation: ml-fade-to .5s 1.5s forwards; cursor: pointer; }
+#mwas-loader .ml-skip:hover, #mwas-loader .ml-skip:focus-visible { color: #fff; }
+
+/* Sortie : le logo s'élève et s'illumine */
+#mwas-loader.ml-out .ml-stage { transform: translateY(-18px) scale(1.06); filter: brightness(1.25); transition: transform .9s cubic-bezier(.7, 0, .2, 1), filter .9s; }
+
+/* Version courte (pages suivantes) : logo déjà formé */
+#mwas-loader.ml-short .ml-body, #mwas-loader.ml-short .ml-hand { opacity: 1; transform: none; animation: none; }
+#mwas-loader.ml-short .ml-reveal { transform: none; animation: none; }
+#mwas-loader.ml-short .ml-arc-draw { display: none; }
+#mwas-loader.ml-short .ml-glow { opacity: 1; transform: translate(-50%, -4%) scale(1); animation: ml-breathe 3.2s ease-in-out infinite; }
+#mwas-loader.ml-short .ml-name span, #mwas-loader.ml-short .ml-tag span, #mwas-loader.ml-short .ml-bar { opacity: 1; transform: none; filter: none; animation: none; }
+#mwas-loader.ml-short .ml-bar i { animation: ml-bar 1.3s ease-in-out infinite; }
+#mwas-loader.ml-short .ml-skip, #mwas-loader.ml-short .ml-rays { display: none; }
+
+@keyframes ml-glow-in { to { opacity: 1; transform: translate(-50%, -4%) scale(1); } }
+@keyframes ml-breathe { 0%, 100% { filter: brightness(1); transform: translate(-50%, -4%) scale(1); } 50% { filter: brightness(1.25); transform: translate(-50%, -4%) scale(1.07); } }
+@keyframes ml-spin { to { transform: translate(-50%, -12%) rotate(360deg); } }
+@keyframes ml-fade-to { to { opacity: var(--to, 1); } }
+@keyframes ml-fade-to-0 { to { opacity: 0; } }
+@keyframes ml-draw { to { stroke-dashoffset: 0; } }
+@keyframes ml-rise { to { opacity: 1; transform: translateY(0); } }
+@keyframes ml-reveal { to { transform: scaleY(1); } }
+@keyframes ml-hand-l { 0% { opacity: 0; } 15% { opacity: 1; } 55% { transform: translateY(6px) rotate(-9deg); } 100% { opacity: 1; transform: translateY(0) rotate(0); } }
+@keyframes ml-hand-r { 0% { opacity: 0; } 15% { opacity: 1; } 55% { transform: translateY(6px) rotate(9deg); } 100% { opacity: 1; transform: translateY(0) rotate(0); } }
+@keyframes ml-praise-l { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-1.6deg) translateY(-2px); } }
+@keyframes ml-praise-r { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(1.6deg) translateY(-2px); } }
+@keyframes ml-shine { 0% { opacity: 0; stroke-dashoffset: 40; } 15% { opacity: .9; } 60% { opacity: .9; } 75%, 100% { opacity: 0; stroke-dashoffset: -520; } }
+@keyframes ml-leaf { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-7deg); } }
+@keyframes ml-swing { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(6deg); } }
+@keyframes ml-spark { 0%, 100% { opacity: 0; transform: scale(.2) rotate(0); } 40% { opacity: 1; transform: scale(1) rotate(45deg); } 70% { opacity: 0; transform: scale(.4) rotate(90deg); } }
+@keyframes ml-letter { to { opacity: 1; transform: none; filter: none; } }
+@keyframes ml-word { to { opacity: 1; transform: none; } }
+@keyframes ml-bar { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  #mwas-loader *, #mwas-loader { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .2s !important; }
+  #mwas-loader .ml-rays, #mwas-loader .ml-spark, #mwas-loader .ml-arc-shine { display: none; }
+}
