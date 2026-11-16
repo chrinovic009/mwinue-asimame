@@ -1,0 +1,98 @@
+/* =====================================================
+   MWAS — Indice « carte à retourner » (page Nos réalisations)
+   ===================================================== */
+
+/* Bandeau d'explication au-dessus des cartes */
+.flip-intro {
+  display: inline-flex; align-items: center; gap: .65rem;
+  margin: -.5rem auto 1.75rem; padding: .55rem 1.1rem .55rem .55rem;
+  border-radius: 999px; background: #fff; border: 1px solid var(--n-border);
+  box-shadow: 0 10px 30px rgba(50, 24, 15, .08);
+  font-size: .9rem; color: var(--n-navy, #32180F);
+}
+.flip-intro-wrap { text-align: center; }
+.flip-intro .fi-card {
+  width: 34px; height: 34px; border-radius: 10px; position: relative; perspective: 200px; flex-shrink: 0;
+}
+.flip-intro .fi-card span {
+  position: absolute; inset: 0; border-radius: 10px; backface-visibility: hidden;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem;
+  animation: fi-turn 3.2s cubic-bezier(.6, 0, .3, 1) infinite;
+}
+.flip-intro .fi-card .fi-front { background: var(--n-gradient-primary, linear-gradient(135deg, #A5481D, #E07B3A)); }
+.flip-intro .fi-card .fi-back { background: #F2B72C; color: #32180F; transform: rotateY(180deg); animation-name: fi-turn-back; }
+.flip-intro strong { color: var(--n-primary, #A5481D); }
+@keyframes fi-turn { 0%, 35% { transform: rotateY(0); } 50%, 85% { transform: rotateY(-180deg); } 100% { transform: rotateY(-360deg); } }
+@keyframes fi-turn-back { 0%, 35% { transform: rotateY(180deg); } 50%, 85% { transform: rotateY(0); } 100% { transform: rotateY(-180deg); } }
+
+/* Face avant : dégradé + pastille en verre */
+.activity-flip .flip-cue {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; pointer-events: none;
+  display: flex; justify-content: center; padding: 3.2rem 1rem 1rem;
+  background: linear-gradient(to top, rgba(26, 12, 6, .72) 0%, rgba(26, 12, 6, .35) 45%, rgba(26, 12, 6, 0) 100%);
+  transition: opacity .35s ease, transform .35s ease;
+}
+.activity-flip .flip-cue-pill {
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .5rem 1rem .5rem .55rem; border-radius: 999px;
+  background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .38);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  color: #fff; font-size: .82rem; font-weight: 600; letter-spacing: .02em;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .25);
+}
+.activity-flip .flip-cue-pill::after { /* reflet qui balaie la pastille */
+  content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .45), transparent);
+  animation: fc-shine 3.6s ease-in-out infinite;
+}
+.activity-flip .flip-cue-icon {
+  width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: #F2B72C; color: #32180F; font-size: .95rem;
+  animation: fc-spin 3.6s cubic-bezier(.6, 0, .3, 1) infinite;
+}
+.activity-flip .flip-cue .t-hover { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .activity-flip .flip-cue .t-touch { display: none; }
+  .activity-flip .flip-cue .t-hover { display: inline; }
+}
+
+/* Coin replié en haut à droite, comme une page qu'on va tourner */
+.activity-flip .flip-corner {
+  position: absolute; top: 0; right: 0; z-index: 3; width: 46px; height: 46px; pointer-events: none;
+  background: linear-gradient(225deg, var(--n-bg, #FBF7F2) 0 50%, rgba(0, 0, 0, .22) 50%, #F2B72C 52%, #FFD979 100%);
+  border-bottom-left-radius: 10px; box-shadow: -3px 3px 8px rgba(0, 0, 0, .18);
+  transform-origin: top right; animation: fc-corner 3.6s ease-in-out infinite;
+}
+
+/* Effets au survol / à la sélection */
+.activity-flip:hover .flip-cue, .activity-flip.is-flipped .flip-cue { opacity: 0; transform: translateY(12px); }
+.activity-flip.is-flipped .flip-corner { opacity: 0; }
+.activity-flip { transition: box-shadow .35s ease, transform .35s ease; }
+.activity-flip:hover { box-shadow: 0 22px 46px rgba(50, 24, 15, .16); }
+
+/* « Coup d'œil » : la carte esquisse un demi-tour quand elle apparaît */
+.activity-flip.flip-peek { animation: fc-peek 1.5s cubic-bezier(.45, 0, .2, 1) both; }
+@keyframes fc-peek {
+  0% { transform: perspective(1000px) rotateY(0); }
+  38% { transform: perspective(1000px) rotateY(-24deg) translateZ(10px); box-shadow: 18px 18px 40px rgba(50, 24, 15, .22); }
+  70% { transform: perspective(1000px) rotateY(7deg); }
+  100% { transform: perspective(1000px) rotateY(0); }
+}
+@keyframes fc-spin { 0%, 55% { transform: rotate(0); } 80%, 100% { transform: rotate(360deg); } }
+@keyframes fc-shine { 0%, 55% { left: -60%; } 85%, 100% { left: 130%; } }
+@keyframes fc-corner { 0%, 60%, 100% { transform: scale(1); } 75% { transform: scale(1.35); } }
+
+/* Bouton « retourner » sur la face arrière */
+.activity-flip .flip-back-btn {
+  position: absolute; top: .7rem; right: .7rem; z-index: 4;
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--n-border, #E9DED2);
+  background: #fff; color: var(--n-primary, #A5481D); display: inline-flex; align-items: center; justify-content: center;
+  transition: transform .4s ease, background .2s;
+}
+.activity-flip .flip-back-btn:hover, .activity-flip .flip-back-btn:focus-visible { background: #FFF1D6; transform: rotate(-180deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .activity-flip.flip-peek, .activity-flip .flip-cue-icon, .activity-flip .flip-cue-pill::after,
+  .activity-flip .flip-corner, .flip-intro .fi-card span { animation: none !important; }
+}
