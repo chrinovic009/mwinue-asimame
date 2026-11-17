@@ -123,7 +123,7 @@
       if (k === 'hours') { if (c.hours) { el.textContent = c.hours; el.closest('[data-site-wrap]') && (el.closest('[data-site-wrap]').hidden = false); } }
       if (k === 'map' && c.map_query) el.src = 'https://www.google.com/maps?q=' + encodeURIComponent(c.map_query) + '&output=embed';
     });
-    document.querySelectorAll('a[href^="mailto:contact@"]').forEach(function (a) { if (c.email) { a.href = 'mailto:' + c.email; if (/@/.test(a.textContent)) a.textContent = c.email; } });
+    document.querySelectorAll('a[href^="mailto:contact@"]').forEach(function (a) { if (c.email) { a.href = 'mailto:' + c.email; if (/@/.test(a.textContent)) { var ic = a.querySelector('i'); a.textContent = c.email; if (ic) a.insertBefore(ic, a.firstChild); }  } });
   }
 
   function applyPartners(list) {

@@ -1,0 +1,109 @@
+/* =====================================================
+   MWAS — Adaptation mobile / tablette (chargé en dernier sur toutes les pages)
+   ===================================================== */
+
+/* Filet de sécurité : jamais de défilement horizontal */
+html, body { max-width: 100%; overflow-x: clip; }
+img, video, iframe, svg, canvas { max-width: 100%; }
+
+/* Les gouttières « g-5 » (48 px) débordent du conteneur sur téléphone */
+@media (max-width: 575.98px) {
+  .row.g-5, .row.gx-5 { --bs-gutter-x: 1.5rem; }
+  .row.g-5, .row.gy-5 { --bs-gutter-y: 2rem; }
+}
+
+/* Les longs mots ne poussent plus la mise en page */
+body { overflow-wrap: break-word; }
+.d-flex > div:not([class*="icon"]):not(.social-icon) { min-width: 0; }
+
+/* Boutons : l'icône reste à côté du texte */
+.btn-lg-custom, .btn-sm-custom { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; text-align: center; }
+.btn-lg-custom .bi, .btn-sm-custom .bi { flex-shrink: 0; }
+@media (max-width: 575.98px) {
+  .btn-lg-custom { padding: .9rem 1.5rem; font-size: .95rem; }
+}
+
+/* =====================================================
+   PIED DE PAGE
+   ===================================================== */
+/* Icônes des réseaux sociaux : bien centrées (la règle « .footer-nexora a » les cassait) */
+.footer-nexora .social-icon {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 42px; height: 42px; margin: 0 !important; line-height: 1; font-size: 1.05rem;
+}
+.footer-nexora .social-icon .bi { display: block; line-height: 1; }
+.footer-nexora .social-icon .bi::before { vertical-align: 0; }
+.footer-nexora .d-flex:has(> .social-icon) { flex-wrap: wrap; gap: .6rem !important; }
+
+/* Coordonnées : icône alignée, texte qui revient à la ligne proprement */
+.footer-contact a, .footer-contact span { display: flex !important; align-items: flex-start; gap: .55rem; margin-bottom: .2rem !important; line-height: 1.45; word-break: break-word; }
+.footer-contact .bi { margin: .2em 0 0 !important; flex: 0 0 auto; width: 1.1em; text-align: center; color: var(--n-primary, #E8611A); }
+
+/* Newsletter */
+.footer-nexora form.d-flex .form-control { min-width: 0; }
+.footer-nexora form.d-flex .btn { width: 48px; padding-left: 0; padding-right: 0; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Bas de page : copyright et liens légaux */
+.footer-bottom p { display: block !important; line-height: 1.7; }
+.footer-bottom p a { display: inline !important; margin: 0 !important; padding-left: .25rem !important; }
+.footer-bottom .d-flex { flex-wrap: wrap; justify-content: center; row-gap: .25rem; }
+.footer-bottom .d-flex a { margin-bottom: 0 !important; }
+
+@media (max-width: 767.98px) {
+  .footer-nexora { padding-top: 3rem; text-align: left; }
+  .footer-nexora .row > [class*="col-"] { margin-bottom: .5rem; }
+  .footer-nexora h6 { margin-bottom: .9rem; }
+  .footer-nexora a { margin-bottom: .55rem; }
+  .footer-bottom { text-align: center; }
+  .footer-bottom .d-flex { gap: 1rem !important; }
+}
+
+/* =====================================================
+   MENU MOBILE : panneau lisible au-dessus du contenu
+   ===================================================== */
+@media (max-width: 991.98px) {
+  .navbar-nexora .navbar-collapse {
+    margin-top: .75rem; padding: .5rem .6rem .8rem; border-radius: 18px;
+    background: #fff; box-shadow: 0 18px 45px rgba(50, 24, 15, .22);
+    max-height: calc(100vh - 96px); max-height: calc(100dvh - 96px); overflow-y: auto; overscroll-behavior: contain;
+  }
+  .navbar-nexora .navbar-nav { margin-top: 0 !important; }
+  .navbar-nexora .nav-link { padding: .8rem 1rem !important; font-size: 1rem; }
+  .navbar-nexora .nav-item .btn { margin-top: .4rem; padding: .85rem 1rem; }
+  .navbar-nexora:has(.navbar-collapse.show), .navbar-nexora:has(.navbar-collapse.collapsing) {
+    background: rgba(255, 255, 255, .96); backdrop-filter: blur(12px); box-shadow: 0 6px 20px rgba(50, 24, 15, .08);
+  }
+  .navbar-toggler-custom { flex-shrink: 0; }
+  .navbar-brand-custom { min-width: 0; max-width: calc(100% - 60px); }
+  .navbar-logo { width: min(200px, 58vw); }
+}
+
+/* Animation de chargement : le nom tient sur les petits écrans */
+@media (max-width: 420px) {
+  #mwas-loader .ml-name { font-size: clamp(1rem, 5vw, 1.4rem); letter-spacing: .2em; text-indent: .2em; }
+  #mwas-loader .ml-tag { letter-spacing: .08em; padding: 0 1rem; }
+}
+
+/* =====================================================
+   TYPOGRAPHIE ET ESPACEMENTS SUR TÉLÉPHONE
+   ===================================================== */
+@media (max-width: 575.98px) {
+  h1, .display-4, .display-5 { word-break: normal; hyphens: auto; }
+  .table-responsive, table { max-width: 100%; }
+  .eyebrow { max-width: 100%; white-space: normal; }
+}
+
+/* Nom de l’association dans le pied de page */
+.footer-nexora .navbar-brand-custom { font-size: 1.45rem; color: #fff !important; margin-bottom: 1rem !important; }
+
+/* =====================================================
+   « NOTRE IMPACT » (accueil) : même taille de bloc, image entière visible
+   ===================================================== */
+#homeRealisations .portfolio-card.pc-fit { background: #32180F; isolation: isolate; }
+#homeRealisations .pc-backdrop {
+  position: absolute; inset: -20px; z-index: 0; background-size: cover; background-position: center;
+  filter: blur(18px) saturate(1.1) brightness(.75); transform: scale(1.05);
+}
+#homeRealisations .portfolio-card.pc-fit img { position: relative; z-index: 1; object-fit: contain; }
+#homeRealisations .portfolio-card.pc-fit:hover img { transform: scale(1.03); }
+#homeRealisations .portfolio-card.pc-fit .portfolio-overlay { z-index: 2; }

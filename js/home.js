@@ -80,7 +80,22 @@
       return '<div class="col-md-6 col-lg-4 reveal"><a href="realisation-details.html?realisation=' + encodeURIComponent(r.slug) + '" class="portfolio-card d-block">' +
         '<img src="' + esc(r.image) + '" alt="' + esc(r.title) + '" loading="lazy"><div class="portfolio-overlay"><span>' + esc(r.category || 'Réalisation') + '</span><h5>' + esc(r.title) + '</h5></div></a></div>';
     }).join('');
+    fitImages(box);
     M.reveal(box);
+  }
+
+  // « Notre impact » : l'image entière tient dans le bloc, un flou de la même image remplit les côtés
+  function fitImages(box) {
+    if (!box) return;
+    box.querySelectorAll('.portfolio-card').forEach(function (card) {
+      var img = card.querySelector('img');
+      if (!img || card.querySelector('.pc-backdrop')) return;
+      var bg = document.createElement('span');
+      bg.className = 'pc-backdrop'; bg.setAttribute('aria-hidden', 'true');
+      bg.style.backgroundImage = 'url("' + (img.currentSrc || img.src).replace(/"/g, '%22') + '")';
+      card.insertBefore(bg, img);
+      card.classList.add('pc-fit');
+    });
   }
 
   function testimonials(list) {
@@ -103,6 +118,7 @@
   });
 
   document.addEventListener('DOMContentLoaded', function () {
+    fitImages($('#homeRealisations'));
     var gb = $('#guestbook');
     if (gb && M.engage) M.engage({ type: 'site', commentsEl: gb, heading: "Livre d'or", subheading: 'Un mot, un encouragement, une question ? Laissez-nous un message, notre équipe vous répondra.' });
     M.api('public?r=view', { type: 'page', id: 'home' }).catch(function () { /* */ });
