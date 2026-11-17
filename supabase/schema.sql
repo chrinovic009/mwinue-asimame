@@ -281,6 +281,43 @@ begin
   end loop;
 end $$;
 
+-- Campagnes et mobilisations (affichées sur l'accueil, puis converties en réalisations)
+create table if not exists campaigns (
+  id uuid primary key default gen_random_uuid(),
+  kind text not null default 'campagne' check (kind in ('campagne','mobilisation')),
+  title text not null,
+  category text,                                   -- étiquette reprise par la réalisation (ex. « 16 jours d'activisme 2026 »)
+  headline text,                                   -- titre affiché sur l'accueil
+  headline_highlight text,                         -- partie du titre mise en couleur
+  lead text,
+  start_date date not null,
+  end_date date,                                   -- vide : la campagne se termine manuellement
+  start_caption text,
+  end_caption text,
+  location text,
+  poster text,                                     -- image affichée
+  poster_full text,                                -- image téléchargeable (haute résolution)
+  themes jsonb not null default '[]'::jsonb,       -- ["Violence physique", ...]
+  pillars jsonb not null default '[]'::jsonb,      -- [["Former","texte"], ...]
+  hashtags jsonb not null default '[]'::jsonb,
+  cta_label text,
+  cta_link text,
+  published boolean not null default true,
+  sort int not null default 0,
+  status text not null default 'active' check (status in ('active','finishing','finished')),
+  finished_at timestamptz,
+  report jsonb not null default '[]'::jsonb,       -- bilan saisi à la clôture
+  photos jsonb not null default '[]'::jsonb,       -- photos de l'activité réalisée
+  realisation_id uuid references realisations(id) on delete set null,
+  latest_choice text check (latest_choice in ('pending','yes','no','later')),
+  author_id uuid references users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists campaigns_status_idx on campaigns(status, start_date);
+alter table campaigns enable row level security;
+revoke all on table campaigns from anon, authenticated;
+
 -- Stockage des médias (images publiques)
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('media', 'media', true, 10485760, array['image/jpeg','image/png','image/webp','image/gif','image/svg+xml','video/mp4'])

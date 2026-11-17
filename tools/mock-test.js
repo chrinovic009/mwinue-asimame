@@ -189,5 +189,46 @@ async function call(name, method, query, body, token, headers) {
   r = await call('admin', 'GET', { r: 'audit_log' }, null, s4);
   assert.ok(r.body.items.length > 5);
 
+  // Campagnes : validation, clôture manuelle, conversion en réalisation, dernière activité
+  r = await call('admin', 'POST', { r: 'campaigns' }, { title: 'Test campagne', start_date: '2026-11-25', end_date: '2026-11-20' }, s4);
+  assert.equal(r.status, 400, 'fin avant début refusée');
+  r = await call('admin', 'POST', { r: 'campaigns' }, { title: 'Test campagne', category: 'Édition 1', lead: 'Texte de lancement', start_date: '2020-01-01', themes: ['Thème A', 'Thème B'], pillars: [['Former', 'x']], poster: 'img/p.jpg' }, s4);
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  const cid = r.body.item.id;
+  r = await call('public', 'GET', { r: 'site' });
+  assert.equal(r.body.campaigns.length, 1, 'campagne sans date de fin affichée');
+  r = await call('admin', 'POST', { r: 'campaign-finish', id: cid }, { report: ['Bilan : 300 personnes touchées'], photos: ['img/photo1.jpg'] }, s4);
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal(r.body.realisation.slug, 'test-campagne');
+  assert.equal(r.body.realisation.image, 'img/photo1.jpg');
+  assert.equal(r.body.campaign.latest_choice, 'pending');
+  r = await call('admin', 'POST', { r: 'campaign-finish', id: cid }, {}, s4);
+  assert.equal(r.status, 409, 'pas de double clôture');
+  r = await call('public', 'GET', { r: 'site' });
+  assert.equal(r.body.campaigns.length, 0, 'campagne terminée retirée de l’accueil');
+  r = await call('public', 'GET', { r: 'realisation', slug: 'test-campagne' });
+  assert.equal(r.status, 200, 'réalisation publiée');
+  r = await call('admin', 'GET', { r: 'dashboard' }, null, s4);
+  assert.equal(r.body.counts.campaigns_decide, 1);
+  r = await call('admin', 'POST', { r: 'campaign-latest', id: cid }, { choice: 'later' }, s4);
+  assert.equal(r.status, 200);
+  r = await call('admin', 'GET', { r: 'dashboard' }, null, s4);
+  assert.equal(r.body.counts.campaigns_decide, 1, 'toujours à décider après « plus tard »');
+  r = await call('admin', 'POST', { r: 'campaign-latest', id: cid }, { choice: 'yes' }, s4);
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal(T.settings.find(x => x.key === 'latest_activity').value.title, 'Test campagne');
+  assert.equal(T.settings.find(x => x.key === 'latest_activity').value.button_link, 'realisation-details.html?realisation=test-campagne');
+  r = await call('admin', 'GET', { r: 'dashboard' }, null, s4);
+  assert.equal(r.body.counts.campaigns_decide, 0);
+  // Clôture automatique à la date de fin
+  r = await call('admin', 'POST', { r: 'campaigns' }, { title: 'Campagne échue', start_date: '2020-02-01', end_date: '2020-02-05' }, s4);
+  const cid2 = r.body.item.id;
+  r = await call('public', 'GET', { r: 'site' });
+  assert.equal(r.body.campaigns.length, 0);
+  const c2 = T.campaigns.find(x => x.id === cid2);
+  assert.equal(c2.status, 'finished'); assert.equal(c2.latest_choice, 'pending'); assert.ok(T.realisations.find(x => x.slug === 'campagne-echue'));
+  r = await call('admin', 'POST', { r: 'campaign-latest', id: cid2 }, { choice: 'no' }, s4);
+  assert.equal(r.status, 200); assert.equal(T.settings.find(x => x.key === 'latest_activity').value.title, 'Test campagne', 'dernière activité inchangée');
+
   console.log('✅ Tous les tests de l’API sont passés (' + T.audit_log.length + ' entrées de journal).');
 })().catch(e => { console.error('❌', e); process.exit(1); });

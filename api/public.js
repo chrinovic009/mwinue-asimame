@@ -2,6 +2,7 @@
 /* API publique du site : contenus, commentaires, j'aime, vues, contact, newsletter */
 const C = require('../lib/core');
 const { db, enc, HttpError } = C;
+const camp = require('../lib/campaigns');
 
 const TYPES = { realisation: 'realisations', article: 'articles' };
 const CARD_R = 'id,slug,title,heading,category,image,summary,event_date,location,featured,views,likes,created_at,sort';
@@ -33,7 +34,7 @@ module.exports = C.handler(async (req, res) => {
   if (req.method === 'GET') {
     /* ----- Informations générales du site ----- */
     if (r === 'site') {
-      const [settings, partners, team, testimonials, metrics, activities, articles, lastReals] = await Promise.all([
+      const [settings, partners, team, testimonials, metrics, activities, articles, lastReals, campaigns] = await Promise.all([
         C.getSettings(),
         db.select('partners', 'select=id,name,logo,url&published=eq.true&order=sort.asc'),
         db.select('team', 'select=id,name,role,photo,bio,socials&published=eq.true&order=sort.asc'),
@@ -41,7 +42,8 @@ module.exports = C.handler(async (req, res) => {
         db.select('impact_metrics', 'select=id,label,value,target,unit,color&published=eq.true&order=sort.asc'),
         db.count('realisations', 'published=eq.true'),
         db.count('articles', 'published=eq.true'),
-        db.select('realisations', 'select=' + CARD_R + '&published=eq.true&order=featured.desc,event_date.desc.nullslast,sort.asc&limit=3')
+        db.select('realisations', 'select=' + CARD_R + '&published=eq.true&order=featured.desc,event_date.desc.nullslast,sort.asc&limit=3'),
+        camp.publicList().catch(() => null)
       ]);
       const g = settings.general || {};
       const out = {
@@ -52,7 +54,8 @@ module.exports = C.handler(async (req, res) => {
         partners, team, testimonials,
         impact: { metrics, percent: impactOf(metrics) },
         stats: { activities, articles, team: team.length, partners: partners.length },
-        latest_realisations: lastReals
+        latest_realisations: lastReals,
+        campaigns
       };
       cache(res, 30);
       return out;

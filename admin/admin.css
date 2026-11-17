@@ -190,3 +190,9 @@ h1, h2, h3, h4, h5, .auth-title { font-family: 'Sora', sans-serif; }
 .pager .page-link { color: var(--brand-dark); border-color: var(--line); }
 .pager .page-item.active .page-link { background: var(--brand); border-color: var(--brand); color: #fff; }
 .pager .page-item.disabled .page-link { color: #c9bdb2; }
+
+/* Campagnes */
+.latest-ask { border: 0; border-radius: 20px; overflow: hidden; }
+.latest-ask-icon { width: 72px; height: 72px; margin: 0 auto; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #fff; background: linear-gradient(135deg, #E8611A, #A5481D); box-shadow: 0 14px 30px rgba(232, 97, 26, .35); }
+.camp-intro strong { color: #A5481D; }
+.latest-ask h5 { color: #32180F; font-weight: 700; }

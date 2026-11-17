@@ -242,6 +242,7 @@
     { id: 'dashboard', label: 'Tableau de bord', icon: 'speedometer2' },
     { id: 'home', label: "Page d'accueil", icon: 'house-heart', perm: 'home' },
     { group: 'Contenus' },
+    { id: 'campaigns', label: 'Campagnes & mobilisations', icon: 'megaphone', perm: 'campaigns', badge: 'campaigns_decide' },
     { id: 'realisations', label: 'Réalisations', icon: 'flag', perm: 'realisations' },
     { id: 'articles', label: 'Actualités', icon: 'newspaper', perm: 'articles' },
     { id: 'gallery', label: 'Galerie', icon: 'images', perm: 'gallery' },
@@ -288,7 +289,7 @@
     refreshCounts();
   }
   async function refreshCounts() {
-    try { S.dashboard = await api('admin?r=dashboard'); S.foundedAt = S.dashboard.founded_at; renderNav(currentRoute()); } catch (e) { /* */ }
+    try { S.dashboard = await api('admin?r=dashboard'); S.foundedAt = S.dashboard.founded_at; renderNav(currentRoute()); maybeAskCampaign(); } catch (e) { /* */ }
   }
 
   function currentRoute() { return (location.hash || '#dashboard').slice(1).split('?')[0] || 'dashboard'; }
@@ -323,7 +324,7 @@
   /* ---------------- Recherche globale ---------------- */
   (function globalSearch() {
     const box = $('#globalSearch'), input = $('#globalSearchInput'), out = $('#globalSearchResults');
-    const ICONS = { realisations: 'flag', articles: 'newspaper', gallery: 'images', team: 'people', partners: 'buildings', testimonials: 'chat-quote', impact: 'graph-up-arrow', comments: 'chat-dots', messages: 'envelope', subscribers: 'send-check', donations: 'cash-coin', users: 'person-lock', nav: 'arrow-right-circle' };
+    const ICONS = { campaigns: 'megaphone', realisations: 'flag', articles: 'newspaper', gallery: 'images', team: 'people', partners: 'buildings', testimonials: 'chat-quote', impact: 'graph-up-arrow', comments: 'chat-dots', messages: 'envelope', subscribers: 'send-check', donations: 'cash-coin', users: 'person-lock', nav: 'arrow-right-circle' };
     const OPENABLE = ['realisations', 'articles', 'gallery', 'team', 'partners', 'testimonials', 'impact'];
     let timer, seq = 0, active = -1;
     function linkFor(key, it, q) {
@@ -619,6 +620,35 @@
   const publishField = { name: 'published', label: 'Publié sur le site', type: 'bool', default: true, col: 'col-md-4' };
   const audienceCell = i => '<td class="text-nowrap small"><i class="bi bi-eye me-1"></i>' + fmtNum(i.views) + ' <i class="bi bi-heart ms-2 me-1"></i>' + fmtNum(i.likes) + '</td>';
   const DEFS = {
+    campaigns: {
+      title: 'campagne',
+      fields: [
+        { type: 'section', label: 'Identité' },
+        { name: 'title', label: 'Nom de la campagne ou de la mobilisation', required: true, col: 'col-md-8', max: 200 },
+        { name: 'kind', label: 'Type', type: 'select', options: [['campagne', 'Campagne'], ['mobilisation', 'Mobilisation']], col: 'col-md-4' },
+        { name: 'category', label: 'Étiquette (reprise dans la réalisation)', col: 'col-md-6', placeholder: "Ex. 16 jours d'activisme 2026" },
+        { name: 'location', label: 'Lieu', col: 'col-md-6', placeholder: 'Kolwezi, Lualaba' },
+        { type: 'section', label: 'Période' },
+        { name: 'start_date', label: 'Date de lancement', type: 'date', required: true, col: 'col-md-6' },
+        { name: 'end_date', label: 'Date de fin (facultative)', type: 'date', col: 'col-md-6', help: 'Le lendemain de cette date, la campagne passe automatiquement dans les réalisations. Sans date de fin, vous la terminez vous-même avec le bouton « Terminer ».' },
+        { name: 'start_caption', label: 'Légende sous la date de lancement', col: 'col-md-6', placeholder: "Ex. Élimination de la violence à l'égard des femmes" },
+        { name: 'end_caption', label: 'Légende sous la date de fin', col: 'col-md-6', placeholder: 'Ex. Droits humains' },
+        { type: 'section', label: "Affichage sur la page d'accueil" },
+        { name: 'headline', label: 'Titre', col: 'col-md-6', placeholder: 'Mwinue Asimame se lève' },
+        { name: 'headline_highlight', label: 'Suite du titre (en couleur)', col: 'col-md-6', placeholder: 'contre les violences basées sur le genre' },
+        { name: 'lead', label: 'Texte de présentation', type: 'textarea', rows: 4 },
+        { name: 'poster', label: 'Affiche (affichée sur le site)', type: 'image', folder: 'campagnes' },
+        { name: 'poster_full', label: 'Affiche haute résolution (bouton « Télécharger »)', type: 'image', folder: 'campagnes', help: 'Facultative : à défaut, l’affiche ci-dessus est proposée au téléchargement.' },
+        { name: 'themes', label: 'Thèmes abordés', type: 'list', long: false, labels: ['Thème (ex. Violence physique)'], addLabel: 'Ajouter un thème' },
+        { name: 'pillars', label: "Axes d'engagement", type: 'pairs', labels: ['Axe (ex. Former)', 'Description'], addLabel: 'Ajouter un axe' },
+        { name: 'hashtags', label: 'Mots-dièse (sans #, séparés par des virgules)', type: 'tags' },
+        { name: 'cta_label', label: 'Texte du bouton', col: 'col-md-6', default: 'Rejoindre la mobilisation' },
+        { name: 'cta_link', label: 'Lien du bouton', col: 'col-md-6', default: 'contact.html' },
+        { type: 'section', label: 'Publication' },
+        { name: 'published', label: "Afficher sur la page d'accueil", type: 'bool', default: true, col: 'col-md-6' },
+        { name: 'sort', label: 'Ordre (si plusieurs campagnes)', type: 'number', step: 1, col: 'col-md-6', default: 0 }
+      ]
+    },
     realisations: {
       title: 'réalisation', viewUrl: i => '/realisation-details.html?realisation=' + encodeURIComponent(i.slug),
       cols: i => '<div class="d-flex gap-2 align-items-center"><img class="thumb" src="' + esc(src(i.image)) + '" alt=""><div><div class="cell-title">' + esc(i.title) + '</div><div class="cell-sub">' + esc(i.category || '') + (i.event_date ? ' · ' + fmtDate(i.event_date) : '') + '</div></div></div>',
@@ -739,6 +769,65 @@
       ]
     }
   };
+
+  /* ---------------- Campagnes : état, dernière activité ---------------- */
+  function kinToday() { return new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Lubumbashi' }); }
+  function kindLabel(c) { return c.kind === 'mobilisation' ? 'Mobilisation' : 'Campagne'; }
+  function dayDiff(a, b) { return Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 86400000); }
+  function campaignState(c) {
+    const draft = c.published === false ? ' <span class="pill pill-off">Non affichée</span>' : '';
+    if (c.status === 'finished') {
+      const choice = ({ pending: '<span class="pill pill-warn">Dernière activité : à décider</span>', later: '<span class="pill pill-warn">À décider plus tard</span>', yes: '<span class="pill pill-on">Dernière activité</span>', no: '<span class="pill pill-off">Réalisation uniquement</span>' })[c.latest_choice] || '';
+      return '<span class="pill pill-off"><i class="bi bi-check2-circle"></i> Terminée</span> ' + choice;
+    }
+    if (c.status === 'finishing') return '<span class="pill pill-warn">Clôture en cours…</span>';
+    const t = kinToday();
+    if (t < c.start_date) { const n = dayDiff(t, c.start_date); return '<span class="pill pill-warn"><i class="bi bi-hourglass-split"></i> À venir · J-' + n + '</span>' + draft; }
+    const day = dayDiff(c.start_date, t) + 1;
+    const total = c.end_date ? dayDiff(c.start_date, c.end_date) + 1 : 0;
+    return '<span class="pill pill-on"><i class="bi bi-broadcast"></i> En cours · Jour ' + day + (total ? '/' + total : '') + '</span>' + draft;
+  }
+  // Question posée après la clôture : Oui / Non / Plus tard
+  function askLatest(c) {
+    return new Promise(resolve => {
+      let el = $('#latestAskModal');
+      if (!el) {
+        document.body.insertAdjacentHTML('beforeend', '<div class="modal fade" id="latestAskModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content latest-ask">' +
+          '<div class="modal-body text-center p-4"><div class="latest-ask-icon"><i class="bi bi-house-heart"></i></div><h5 class="mt-3 mb-2" data-ask-title></h5><p class="text-muted mb-4" data-ask-text></p>' +
+          '<div class="d-grid gap-2"><button class="btn btn-brand" data-choice="yes"><i class="bi bi-check2 me-1"></i>Oui, la placer comme dernière activité</button>' +
+          '<button class="btn btn-light" data-choice="no">Non, seulement dans les réalisations</button>' +
+          '<button class="btn btn-link text-muted" data-choice="later">Plus tard</button></div><p class="small text-danger mt-3 mb-0" data-ask-error></p></div></div></div></div>');
+        el = $('#latestAskModal');
+      }
+      const m = bootstrap.Modal.getOrCreateInstance(el);
+      $('[data-ask-title]', el).textContent = '« ' + c.title + ' » est terminée';
+      $('[data-ask-text]', el).textContent = 'Elle figure désormais dans vos réalisations. Voulez-vous la placer comme dernière activité sur la page d’accueil ?' + (can('home') ? '' : ' (Seul un utilisateur autorisé à gérer la page d’accueil peut répondre « Oui ».)');
+      $('[data-choice="yes"]', el).disabled = !can('home');
+      $('[data-ask-error]', el).textContent = '';
+      let answered = false;
+      el.onclick = async e => {
+        const b = e.target.closest('[data-choice]'); if (!b) return;
+        busy(b, true);
+        try {
+          await api('admin?r=campaign-latest&id=' + c.id, { method: 'POST', body: { choice: b.dataset.choice } });
+          answered = true;
+          toast(({ yes: 'C’est maintenant la dernière activité de l’accueil.', no: 'Elle reste uniquement dans les réalisations.', later: 'D’accord : vous pourrez décider plus tard depuis « Campagnes ».' })[b.dataset.choice]);
+          m.hide(); refreshCounts();
+        } catch (err) { $('[data-ask-error]', el).textContent = err.message; } finally { busy(b, false); }
+      };
+      el.addEventListener('hidden.bs.modal', () => resolve(answered), { once: true });
+      m.show();
+    });
+  }
+  // À l'ouverture de l'administration : propose la question pour les campagnes clôturées automatiquement
+  let askedThisSession = false;
+  function maybeAskCampaign() {
+    if (askedThisSession || !S.dashboard || !can('campaigns')) return;
+    const c = (S.dashboard.campaigns_to_decide || []).find(x => x.latest_choice === 'pending');
+    if (!c || $('.modal.show')) return;
+    askedThisSession = true;
+    askLatest(c).then(() => { if (currentRoute() === 'campaigns') route(); });
+  }
 
   /* ---------------- Pagination, filtres et paramètres d'URL ---------------- */
   function hashParams() { return new URLSearchParams((location.hash.split('?')[1]) || ''); }
@@ -941,6 +1030,81 @@
         try { const v = readForm(box, fields); busy(btn, true); await api('admin?r=settings&key=latest_activity', { method: 'PUT', body: { value: v } }); toast('Accueil mis à jour.'); }
         catch (err) { toast(err.message, 'error'); } finally { busy(btn, false); }
       });
+    },
+
+    async campaigns(view) {
+      const def = DEFS.campaigns;
+      let items = [];
+      const st = listController(view, 'campaigns', load);
+      view.innerHTML = '<div class="panel mb-3 small camp-intro"><i class="bi bi-info-circle text-brand me-1"></i>Une campagne ou mobilisation s’affiche sur la page d’accueil dès sa création (compte à rebours avant le lancement, puis « Jour x »). ' +
+        'À sa date de fin, ou quand vous cliquez sur <strong>Terminer</strong>, elle devient automatiquement une <strong>réalisation</strong>, et l’on vous demande si elle doit devenir la <strong>dernière activité</strong> de l’accueil.</div>' +
+        '<div class="toolbar">' + searchBox(st, 'Rechercher une campagne…') +
+        '<select class="form-select w-auto" data-f="status"><option value="">Toutes</option><option value="active">À venir / en cours</option><option value="finished">Terminées</option></select>' +
+        '<select class="form-select w-auto" data-f="kind"><option value="">Tous les types</option><option value="campagne">Campagnes</option><option value="mobilisation">Mobilisations</option></select>' +
+        '<span class="ms-auto"></span><button class="btn btn-brand" data-new><i class="bi bi-plus-lg me-1"></i>Nouvelle campagne</button></div><div data-list></div>';
+      async function load() {
+        const r = await api('admin?r=campaigns&' + st.query());
+        items = r.items; draw(r.total);
+      }
+      function draw(total) {
+        const list = $('[data-list]', view);
+        if (!items.length) { list.innerHTML = '<div class="panel empty"><i class="bi bi-megaphone"></i>' + (st.q || Object.values(st.filters).some(Boolean) ? 'Aucun résultat pour cette recherche.' : 'Aucune campagne pour le moment. Lancez la première !') + '</div>'; return; }
+        list.innerHTML = '<div class="table-wrap table-responsive"><table class="table"><thead><tr><th>Campagne</th><th>Période</th><th>État</th><th class="text-end">Actions</th></tr></thead><tbody>' +
+          items.map(i => {
+            const done = i.status !== 'active';
+            const decide = i.status === 'finished' && (i.latest_choice === 'pending' || i.latest_choice === 'later');
+            return '<tr data-id="' + i.id + '"><td><div class="d-flex gap-2 align-items-center"><img class="thumb" src="' + esc(src(i.poster)) + '" alt=""><div><div class="cell-title">' + esc(i.title) + '</div><div class="cell-sub">' + kindLabel(i) + (i.location ? ' · ' + esc(i.location) : '') + '</div></div></div></td>' +
+              '<td class="small text-nowrap">' + fmtDate(i.start_date) + '<br><span class="text-muted">' + (i.end_date ? 'au ' + fmtDate(i.end_date) : 'sans date de fin') + '</span></td>' +
+              '<td>' + campaignState(i) + '</td>' +
+              '<td><div class="row-actions">' +
+              (!done && i.published !== false ? '<a class="btn btn-light btn-sm" target="_blank" rel="noopener" href="/index.html#campagne-' + i.id + '" title="Voir sur l’accueil"><i class="bi bi-box-arrow-up-right"></i></a>' : '') +
+              (i.realisation_id && can('realisations') ? '<a class="btn btn-light btn-sm" href="#realisations?open=' + i.realisation_id + '" title="Ouvrir la réalisation"><i class="bi bi-flag"></i></a>' : '') +
+              (decide ? '<button class="btn btn-soft btn-sm" data-decide title="Placer comme dernière activité ?"><i class="bi bi-house-heart me-1"></i>Dernière activité ?</button>' : '') +
+              (!done ? '<button class="btn btn-soft btn-sm" data-finish title="Terminer et créer la réalisation"><i class="bi bi-flag-fill me-1"></i>Terminer</button>' : '') +
+              '<button class="btn btn-light btn-sm" data-edit title="Modifier"><i class="bi bi-pencil"></i></button>' +
+              (can('delete') ? '<button class="btn btn-light btn-sm text-danger" data-del title="Supprimer"><i class="bi bi-trash"></i></button>' : '') +
+              '</div></td></tr>';
+          }).join('') + '</tbody></table></div>' + pagerHtml(total, st.page, st.size);
+      }
+      function edit(item) {
+        const fields = def.fields.map(f => f.name === 'published' && !can('publish') ? Object.assign({}, f, { disabled: true, help: 'Un administrateur validera l’affichage sur le site.' }) : f);
+        openEditor((item ? 'Modifier : ' : 'Nouvelle ') + (item ? item.title : 'campagne ou mobilisation'), fields, item || { kind: 'campagne', start_date: kinToday() }, async values => {
+          if (item) await api('admin?r=campaigns&id=' + item.id, { method: 'PUT', body: values });
+          else await api('admin?r=campaigns', { method: 'POST', body: values });
+          toast(item ? 'Campagne mise à jour.' : 'Campagne créée : elle s’affiche sur la page d’accueil.');
+          await load(); refreshCounts();
+        });
+      }
+      function finish(item) {
+        const word = item.kind === 'mobilisation' ? 'la mobilisation' : 'la campagne';
+        openEditor('Terminer ' + word + ' : ' + item.title, [
+          { type: 'section', label: 'Clôture — ' + word + ' deviendra une réalisation' },
+          { name: 'end_date', label: 'Date de fin effective', type: 'date', required: true, col: 'col-md-6' },
+          { name: 'report', label: 'Bilan (facultatif) : ce qui a été réalisé, chiffres clés…', type: 'list', labels: ['Paragraphe du bilan'], addLabel: 'Ajouter un paragraphe' },
+          { name: 'photos', label: "Photos de l'activité (facultatif — la 1re devient l'image de la réalisation)", type: 'images', folder: 'realisations' }
+        ], { end_date: item.end_date && item.end_date < kinToday() ? item.end_date : kinToday() }, async values => {
+          const r = await api('admin?r=campaign-finish&id=' + item.id, { method: 'POST', body: values });
+          toast('« ' + item.title + ' » est maintenant dans les réalisations.');
+          await load(); refreshCounts();
+          setTimeout(() => askLatest(r.campaign).then(load), 450);
+        });
+      }
+      async function openById(id) { try { const full = await api('admin?r=campaigns&id=' + encodeURIComponent(id)); edit(full.item); } catch (err) { toast(err.message, 'error'); } }
+      view.addEventListener('click', async e => {
+        if (e.target.closest('[data-new]')) return edit(null);
+        const tr = e.target.closest('tr[data-id]'); if (!tr) return;
+        const item = items.find(i => i.id === tr.dataset.id);
+        try {
+          if (e.target.closest('[data-edit]')) return openById(item.id);
+          if (e.target.closest('[data-finish]')) return finish(item);
+          if (e.target.closest('[data-decide]')) { await askLatest(item); return load(); }
+          if (e.target.closest('[data-del]') && confirmDel('« ' + item.title + ' »' + (item.realisation_id ? ' (la réalisation créée sera conservée)' : ''))) { await api('admin?r=campaigns&id=' + item.id, { method: 'DELETE' }); toast('Supprimée.'); load(); refreshCounts(); }
+        } catch (err) { toast(err.message, 'error'); }
+      });
+      await load();
+      const p = hashParams();
+      if (p.get('open')) openById(p.get('open'));
+      if (p.get('decide')) { const it = items.find(i => i.id === p.get('decide')); if (it) askLatest(it).then(load); }
     },
 
     realisations: crudView('realisations'),

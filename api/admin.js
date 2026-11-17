@@ -3,8 +3,15 @@
 const C = require('../lib/core');
 const { db, enc, HttpError, can } = C;
 const pay = require('../lib/payments');
+const camp = require('../lib/campaigns');
 
 const RESOURCES = {
+  campaigns: {
+    table: 'campaigns', perm: 'campaigns', order: 'start_date.desc,created_at.desc', publishable: true, author: true,
+    fields: ['kind', 'title', 'category', 'headline', 'headline_highlight', 'lead', 'start_date', 'end_date', 'start_caption', 'end_caption', 'location',
+      'poster', 'poster_full', 'themes', 'pillars', 'hashtags', 'cta_label', 'cta_link', 'published', 'sort', 'report', 'photos'],
+    search: ['title', 'category', 'location']
+  },
   realisations: {
     table: 'realisations', perm: 'realisations', order: 'sort.asc,created_at.desc', publishable: true, slug: true, author: true,
     fields: ['slug', 'title', 'heading', 'category', 'image', 'summary', 'description', 'intro', 'features_heading', 'features',
@@ -33,7 +40,7 @@ const RESOURCES = {
   audit_log: { table: 'audit_log', perm: '__admin', order: 'created_at.desc', fields: [], readOnly: true, search: ['action', 'user_name', 'entity'] }
 };
 
-const JSON_FIELDS = ['intro', 'features', 'steps', 'questions', 'gallery', 'paragraphs', 'tags', 'socials'];
+const JSON_FIELDS = ['themes', 'pillars', 'hashtags', 'report', 'photos', 'intro', 'features', 'steps', 'questions', 'gallery', 'paragraphs', 'tags', 'socials'];
 const NUM_FIELDS = ['sort', 'read_minutes', 'value', 'target', 'rating'];
 const BOOL_FIELDS = ['published', 'featured', 'read', 'archived', 'active'];
 
@@ -50,7 +57,7 @@ function clean(cfg, input) {
       if (!Number.isFinite(v)) throw new HttpError(400, 'Valeur numérique invalide : ' + f);
     } else if (BOOL_FIELDS.includes(f)) {
       v = v === true || v === 'true' || v === 1 || v === '1' || v === 'on';
-    } else if (f === 'event_date' || f === 'published_at') {
+    } else if (f === 'event_date' || f === 'published_at' || f === 'start_date' || f === 'end_date') {
       v = v ? String(v) : null;
       if (f === 'published_at' && !v) v = new Date().toISOString();
     } else if (f === 'status') {
@@ -61,6 +68,17 @@ function clean(cfg, input) {
     out[f] = v;
   });
   return out;
+}
+
+// Contrôles propres aux campagnes
+function checkCampaign(row, creating, current) {
+  if ('kind' in row && !['campagne', 'mobilisation'].includes(row.kind)) row.kind = 'campagne';
+  const iso = /^\d{4}-\d{2}-\d{2}$/;
+  if (creating && !row.start_date) throw new HttpError(400, 'Indiquez la date de lancement.');
+  if ('start_date' in row) { if (!row.start_date || !iso.test(row.start_date.slice(0, 10))) throw new HttpError(400, 'Date de lancement invalide.'); row.start_date = row.start_date.slice(0, 10); }
+  if ('end_date' in row && row.end_date) { if (!iso.test(row.end_date.slice(0, 10))) throw new HttpError(400, 'Date de fin invalide.'); row.end_date = row.end_date.slice(0, 10); }
+  const start = row.start_date || (current && current.start_date), end = 'end_date' in row ? row.end_date : (current && current.end_date);
+  if (start && end && end < start) throw new HttpError(400, 'La date de fin ne peut pas précéder la date de lancement.');
 }
 
 function need(user, perm) {
@@ -80,6 +98,14 @@ async function uniqueSlug(table, base, exceptId) {
 async function dashboard(user) {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  let toDecide = [], activeCampaigns = 0;
+  if (can(user, 'campaigns')) {
+    await camp.finalizeDue();
+    [toDecide, activeCampaigns] = await Promise.all([
+      db.select('campaigns', 'select=id,title,kind,latest_choice,realisation_id,end_date&status=eq.finished&latest_choice=in.(pending,later)&order=finished_at.desc').catch(() => []),
+      db.count('campaigns', 'status=eq.active').catch(() => 0)
+    ]);
+  }
   const [settings, reals, arts, donations, pendingComments, totalComments, unread, subs, metrics, recent, teamCount, galleryCount] = await Promise.all([
     C.getSettings(),
     db.select('realisations', 'select=id,title,slug,views,likes,published&order=views.desc'),
@@ -116,8 +142,10 @@ async function dashboard(user) {
     counts: {
       realisations: reals.length, articles: arts.length, gallery: galleryCount, team: teamCount, subscribers: subs,
       comments: totalComments, pending_comments: pendingComments, unread_messages: unread,
-      views: sum(reals, 'views') + sum(arts, 'views'), likes: sum(reals, 'likes') + sum(arts, 'likes')
+      views: sum(reals, 'views') + sum(arts, 'views'), likes: sum(reals, 'likes') + sum(arts, 'likes'),
+      campaigns_active: activeCampaigns, campaigns_decide: toDecide.length
     },
+    campaigns_to_decide: toDecide,
     donations: can(user, 'donations') ? {
       total_by_currency: byCurrency, success_count: ok.length,
       pending_count: donations.filter(d => d.status === 'pending').length,
@@ -150,6 +178,7 @@ module.exports = C.handler(async (req) => {
     if (q.length < 2) return { groups: [] };
     const like = f => f + '.ilike.*' + enc(q) + '*';
     const S = [
+      ['campaigns', 'campaigns', 'Campagnes', 'id,title,category,poster', ['title', 'category', 'location'], x => [x.title, x.category, x.poster]],
       ['realisations', 'realisations', 'Réalisations', 'id,title,category,image', ['title', 'category', 'summary', 'slug'], x => [x.title, x.category, x.image]],
       ['articles', 'articles', 'Actualités', 'id,title,category,image', ['title', 'category', 'excerpt', 'slug'], x => [x.title, x.category, x.image]],
       ['gallery', 'gallery', 'Galerie', 'id,title,label,image', ['title', 'label', 'description', 'theme'], x => [x.title, x.label, x.image]],
@@ -162,7 +191,7 @@ module.exports = C.handler(async (req) => {
       ['subscribers', 'subscribers', 'Abonnés', 'id,email,active', ['email'], x => [x.email, x.active ? 'Actif' : 'Désinscrit']],
       ['donations', 'donations', 'Dons', 'id,reference,donor_name,amount,currency,status', ['reference', 'donor_name', 'phone'], x => [x.donor_name || x.reference, x.amount + ' ' + x.currency + ' · ' + x.status]]
     ];
-    const perm = { realisations: 'realisations', articles: 'articles', gallery: 'gallery', team: 'team', partners: 'partners', testimonials: 'testimonials', impact: 'impact', comments: 'comments', messages: 'messages', subscribers: 'subscribers', donations: 'donations' };
+    const perm = { campaigns: 'campaigns', realisations: 'realisations', articles: 'articles', gallery: 'gallery', team: 'team', partners: 'partners', testimonials: 'testimonials', impact: 'impact', comments: 'comments', messages: 'messages', subscribers: 'subscribers', donations: 'donations' };
     const groups = await Promise.all(S.filter(d => can(user, perm[d[0]])).map(async d => {
       try {
         const res = await C.rest('GET', d[1] + '?select=' + d[3] + '&or=(' + d[4].map(like).join(',') + ')&limit=6', { prefer: 'count=exact', withCount: true });
@@ -196,7 +225,7 @@ module.exports = C.handler(async (req) => {
 
   /* ---------- Téléversement de médias ---------- */
   if (r === 'upload') {
-    if (!(can(user, 'media') || ['realisations', 'articles', 'gallery', 'team', 'partners', 'testimonials', 'home'].some(p => can(user, p)))) need(user, 'media');
+    if (!(can(user, 'media') || ['campaigns', 'realisations', 'articles', 'gallery', 'team', 'partners', 'testimonials', 'home'].some(p => can(user, p)))) need(user, 'media');
     const name = C.str(b.filename, 200) || 'fichier';
     const type = C.str(b.contentType, 100);
     if (!/^(image\/(jpeg|png|webp|gif|svg\+xml)|video\/mp4)$/.test(type)) throw new HttpError(400, 'Format non accepté (JPG, PNG, WEBP, GIF, SVG ou MP4).');
@@ -208,7 +237,7 @@ module.exports = C.handler(async (req) => {
   if (r === 'media') {
     need(user, 'media');
     if (req.method === 'GET') {
-      const folders = ['realisations', 'articles', 'gallery', 'team', 'partners', 'testimonials', 'home', 'divers'];
+      const folders = ['campagnes', 'realisations', 'articles', 'gallery', 'team', 'partners', 'testimonials', 'home', 'divers'];
       const lists = await Promise.all(folders.map(f => C.listMedia(f).catch(() => [])));
       const files = [];
       lists.forEach((l, i) => (l || []).forEach(o => { if (o.name && o.id) files.push({ path: folders[i] + '/' + o.name, url: C.publicUrl(folders[i] + '/' + o.name), size: o.metadata && o.metadata.size, created_at: o.created_at }); }));
@@ -251,6 +280,32 @@ module.exports = C.handler(async (req) => {
     const updated = await pay.refresh(d, true);
     await C.audit(user, 'recheck', 'donations', d.id, { status: updated.status });
     return { item: updated };
+  }
+
+  /* ---------- Campagnes : clôture et dernière activité ---------- */
+  if (r === 'campaign-finish' && req.method === 'POST') {
+    need(user, 'campaigns');
+    const c = await db.one('campaigns', 'select=*&id=eq.' + enc(id));
+    if (!c) throw new HttpError(404, 'Campagne introuvable.');
+    if (c.status !== 'active') throw new HttpError(409, 'Cette campagne est déjà terminée.');
+    const end = b.end_date ? String(b.end_date).slice(0, 10) : camp.today();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(end)) throw new HttpError(400, 'Date de fin invalide.');
+    if (end < c.start_date) throw new HttpError(400, 'La date de fin ne peut pas précéder la date de lancement.');
+    const list = (v, n) => Array.isArray(v) ? v.map(x => C.str(x, n)).filter(Boolean) : undefined;
+    const out = await camp.finish(c, { user, end_date: end, report: list(b.report, 5000), photos: list(b.photos, 1000), publish: can(user, 'publish') });
+    return Object.assign(out, { can_set_latest: can(user, 'home') });
+  }
+  if (r === 'campaign-latest' && req.method === 'POST') {
+    need(user, 'campaigns');
+    const choice = String(b.choice || '');
+    if (!['yes', 'no', 'later'].includes(choice)) throw new HttpError(400, 'Choix invalide.');
+    const c = await db.one('campaigns', 'select=*&id=eq.' + enc(id));
+    if (!c) throw new HttpError(404, 'Campagne introuvable.');
+    if (c.status !== 'finished') throw new HttpError(400, 'La campagne doit d’abord être terminée.');
+    if (choice === 'yes') { need(user, 'home'); await camp.setLatest(c, user); }
+    const item = await db.update('campaigns', 'id=eq.' + enc(id), { latest_choice: choice, updated_at: new Date().toISOString() });
+    await C.audit(user, 'latest-choice', 'campaigns', id, { choice });
+    return { item };
   }
 
   /* ---------- Utilisateurs (administrateur uniquement) ---------- */
@@ -308,6 +363,7 @@ module.exports = C.handler(async (req) => {
   need(user, cfg.perm);
 
   if (req.method === 'GET') {
+    if (r === 'campaigns' && !id) await camp.finalizeDue();
     if (id) {
       const item = await db.one(cfg.table, 'select=*&id=eq.' + enc(id));
       if (!item) throw new HttpError(404, 'Élément introuvable.');
@@ -318,7 +374,7 @@ module.exports = C.handler(async (req) => {
     const filters = [];
     const q = C.str(req.query.q, 100).replace(/[(),*]/g, ' ');
     if (q && cfg.search) filters.push('or=(' + cfg.search.map(f => f + '.ilike.*' + enc(q) + '*').join(',') + ')');
-    ['status', 'target_type', 'read', 'archived', 'published', 'network', 'currency', 'category', 'active', 'action'].forEach(f => {
+    ['status', 'target_type', 'read', 'archived', 'published', 'network', 'currency', 'category', 'active', 'action', 'kind', 'latest_choice'].forEach(f => {
       if (req.query[f] !== undefined && req.query[f] !== '') filters.push(f + '=eq.' + enc(String(req.query[f])));
     });
     const res = await C.rest('GET', cfg.table + '?select=*' + (filters.length ? '&' + filters.join('&') : '') + '&order=' + cfg.order + '&limit=' + limit + '&offset=' + offset, { prefer: 'count=exact', withCount: true });
@@ -340,6 +396,7 @@ module.exports = C.handler(async (req) => {
   if (req.method === 'POST') {
     if (cfg.noCreate) throw new HttpError(405, 'Création non autorisée ici.');
     const row = clean(cfg, b);
+    if (r === 'campaigns') checkCampaign(row, true);
     if (cfg.publishable && !can(user, 'publish')) row.published = false;
     if (cfg.slug) row.slug = await uniqueSlug(cfg.table, row.slug || row.title);
     if (cfg.author) row.author_id = user.id;
@@ -352,6 +409,7 @@ module.exports = C.handler(async (req) => {
   if (req.method === 'PUT' || req.method === 'PATCH') {
     if (!C.isUuid(id)) throw new HttpError(400, 'Identifiant invalide.');
     const patch = clean(cfg, b);
+    if (r === 'campaigns') checkCampaign(patch, false, await db.one('campaigns', 'select=start_date,end_date&id=eq.' + enc(id)));
     if (cfg.publishable && 'published' in patch && !can(user, 'publish')) delete patch.published;
     if (cfg.slug && 'slug' in patch) patch.slug = await uniqueSlug(cfg.table, patch.slug || patch.title || 'element', id);
     if (r === 'comments' && patch.status && !['approved', 'pending', 'hidden'].includes(patch.status)) throw new HttpError(400, 'Statut invalide.');

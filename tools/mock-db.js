@@ -2,7 +2,7 @@
 // Base PostgREST + Storage + FlexPay simulée en mémoire (tests locaux uniquement)
 const crypto = require('crypto');
 
-const T = { settings: [], users: [], realisations: [], articles: [], gallery: [], team: [], partners: [], testimonials: [], impact_metrics: [], comments: [], likes: [], views: [], donations: [], messages: [], subscribers: [], audit_log: [] };
+const T = { campaigns: [], settings: [], users: [], realisations: [], articles: [], gallery: [], team: [], partners: [], testimonials: [], impact_metrics: [], comments: [], likes: [], views: [], donations: [], messages: [], subscribers: [], audit_log: [] };
 const UNIQUE = { users: ['email'], realisations: ['slug'], articles: ['slug'], subscribers: ['email'], settings: ['key'], donations: ['reference'], likes: ['target_type', 'target_id', 'visitor_id'], views: ['target_type', 'target_id', 'visitor_id', 'day'] };
 let seq = 1;
 const now = () => new Date().toISOString();
@@ -11,6 +11,7 @@ function defaults(t, r) {
   if (['realisations', 'articles'].includes(t)) Object.assign(d, { views: 0, likes: 0, published: true, sort: 0, intro: [], features: [], steps: [], questions: [], gallery: [], tags: [], paragraphs: [] });
   if (t === 'articles') d.published_at = now();
   if (['gallery', 'team', 'partners', 'testimonials', 'impact_metrics'].includes(t)) Object.assign(d, { published: true, sort: 0 });
+  if (t === 'campaigns') Object.assign(d, { status: 'active', published: true, sort: 0, themes: [], pillars: [], hashtags: [], report: [], photos: [], latest_choice: null, realisation_id: null, end_date: null });
   if (t === 'comments') Object.assign(d, { status: 'approved', likes: 0, is_staff: false, parent_id: null });
   if (t === 'users') Object.assign(d, { active: true, token_version: 0, pin_attempts: 0, permissions: [], role: 'communicator' });
   if (t === 'messages') Object.assign(d, { read: false, archived: false });
@@ -27,6 +28,7 @@ function cmp(v, op, raw) {
     case 'neq': return s !== val;
     case 'gte': return s !== null && s >= val;
     case 'lte': return s !== null && s <= val;
+    case 'lt': return s !== null && s < val;
     case 'in': return val.replace(/^\(|\)$/g, '').split(',').includes(s);
     case 'ilike': { const re = new RegExp('^' + val.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$', 'i'); return s !== null && re.test(s); }
   }
