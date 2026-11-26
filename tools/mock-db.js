@@ -2,8 +2,8 @@
 // Base PostgREST + Storage + FlexPay simulée en mémoire (tests locaux uniquement)
 const crypto = require('crypto');
 
-const T = { campaigns: [], settings: [], users: [], realisations: [], articles: [], gallery: [], team: [], partners: [], testimonials: [], impact_metrics: [], comments: [], likes: [], views: [], donations: [], messages: [], subscribers: [], audit_log: [] };
-const UNIQUE = { users: ['email'], realisations: ['slug'], articles: ['slug'], subscribers: ['email'], settings: ['key'], donations: ['reference'], likes: ['target_type', 'target_id', 'visitor_id'], views: ['target_type', 'target_id', 'visitor_id', 'day'] };
+const T = { testimonies: [], campaigns: [], settings: [], users: [], realisations: [], articles: [], gallery: [], team: [], partners: [], testimonials: [], impact_metrics: [], comments: [], likes: [], views: [], donations: [], messages: [], subscribers: [], audit_log: [] };
+const UNIQUE = { testimonies: ['code_hash'], users: ['email'], realisations: ['slug'], articles: ['slug'], subscribers: ['email'], settings: ['key'], donations: ['reference'], likes: ['target_type', 'target_id', 'visitor_id'], views: ['target_type', 'target_id', 'visitor_id', 'day'] };
 let seq = 1;
 const now = () => new Date().toISOString();
 function defaults(t, r) {
@@ -11,6 +11,7 @@ function defaults(t, r) {
   if (['realisations', 'articles'].includes(t)) Object.assign(d, { views: 0, likes: 0, published: true, sort: 0, intro: [], features: [], steps: [], questions: [], gallery: [], tags: [], paragraphs: [] });
   if (t === 'articles') d.published_at = now();
   if (['gallery', 'team', 'partners', 'testimonials', 'impact_metrics'].includes(t)) Object.assign(d, { published: true, sort: 0 });
+  if (t === 'testimonies') Object.assign(d, { status: 'new', published: false, allow_publish: false, reply: null, reply_public: true, public_text: null, published_at: null, updated_at: now() });
   if (t === 'campaigns') Object.assign(d, { status: 'active', published: true, sort: 0, themes: [], pillars: [], hashtags: [], report: [], photos: [], latest_choice: null, realisation_id: null, end_date: null });
   if (t === 'comments') Object.assign(d, { status: 'approved', likes: 0, is_staff: false, parent_id: null });
   if (t === 'users') Object.assign(d, { active: true, token_version: 0, pin_attempts: 0, permissions: [], role: 'communicator' });
@@ -77,7 +78,9 @@ global.fetch = async (url, opts = {}) => {
     }
     const total = rows.length;
     const off = Number((params.find(p => p[0] === 'offset') || [])[1] || 0), lim = Number((params.find(p => p[0] === 'limit') || [])[1] || 1e9);
-    return resp(200, rows.slice(off, off + lim).map(r => Object.assign({}, r)), { 'content-range': '0-0/' + total });
+    const sel = decodeURIComponent((params.find(p => p[0] === 'select') || [])[1] || '*');
+    const pick = r => sel === '*' || sel.includes('(') ? Object.assign({}, r) : Object.fromEntries(sel.split(',').map(k => [k, r[k] === undefined ? null : r[k]]));
+    return resp(200, rows.slice(off, off + lim).map(pick), { 'content-range': '0-0/' + total });
   }
   if (opts.method === 'POST') {
     const body = JSON.parse(opts.body); const rows = Array.isArray(body) ? body : [body];

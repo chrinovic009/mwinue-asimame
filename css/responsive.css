@@ -88,7 +88,7 @@ body { overflow-wrap: break-word; }
    TYPOGRAPHIE ET ESPACEMENTS SUR TÉLÉPHONE
    ===================================================== */
 @media (max-width: 575.98px) {
-  h1, .display-4, .display-5 { word-break: normal; hyphens: auto; }
+  h1, .display-4, .display-5 { word-break: normal; hyphens: manual; }
   .table-responsive, table { max-width: 100%; }
   .eyebrow { max-width: 100%; white-space: normal; }
 }

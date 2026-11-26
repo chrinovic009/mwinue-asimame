@@ -4,12 +4,13 @@ const C = require('../lib/core');
 const { db, enc, HttpError, can } = C;
 const pay = require('../lib/payments');
 const camp = require('../lib/campaigns');
+const TM = require('../lib/testimonies');
 
 const RESOURCES = {
   campaigns: {
     table: 'campaigns', perm: 'campaigns', order: 'start_date.desc,created_at.desc', publishable: true, author: true,
     fields: ['kind', 'title', 'category', 'headline', 'headline_highlight', 'lead', 'start_date', 'end_date', 'start_caption', 'end_caption', 'location',
-      'poster', 'poster_full', 'themes', 'pillars', 'hashtags', 'cta_label', 'cta_link', 'published', 'sort', 'report', 'photos'],
+      'poster', 'poster_full', 'hero_image', 'themes', 'pillars', 'hashtags', 'cta_label', 'cta_link', 'published', 'sort', 'report', 'photos'],
     search: ['title', 'category', 'location']
   },
   realisations: {
@@ -120,6 +121,7 @@ async function dashboard(user) {
     db.count('team', 'published=eq.true'),
     db.count('gallery')
   ]);
+  const newTestimonies = can(user, 'testimonies') ? await db.count('testimonies', 'status=eq.new').catch(() => 0) : 0;
   const sum = (arr, k) => arr.reduce((s, x) => s + (Number(x[k]) || 0), 0);
   const ok = donations.filter(d => d.status === 'success');
   const byCurrency = {};
@@ -143,7 +145,7 @@ async function dashboard(user) {
       realisations: reals.length, articles: arts.length, gallery: galleryCount, team: teamCount, subscribers: subs,
       comments: totalComments, pending_comments: pendingComments, unread_messages: unread,
       views: sum(reals, 'views') + sum(arts, 'views'), likes: sum(reals, 'likes') + sum(arts, 'likes'),
-      campaigns_active: activeCampaigns, campaigns_decide: toDecide.length
+      campaigns_active: activeCampaigns, campaigns_decide: toDecide.length, testimonies_new: newTestimonies
     },
     campaigns_to_decide: toDecide,
     donations: can(user, 'donations') ? {
@@ -178,6 +180,7 @@ module.exports = C.handler(async (req) => {
     if (q.length < 2) return { groups: [] };
     const like = f => f + '.ilike.*' + enc(q) + '*';
     const S = [
+      ['testimonies', 'testimonies', 'Témoignages', 'id,role,category,content', ['content', 'public_text'], x => [(TM.ROLES[x.role] || '') + ' · ' + (TM.CATEGORIES[x.category] || ''), String(x.content).slice(0, 90)]],
       ['campaigns', 'campaigns', 'Campagnes', 'id,title,category,poster', ['title', 'category', 'location'], x => [x.title, x.category, x.poster]],
       ['realisations', 'realisations', 'Réalisations', 'id,title,category,image', ['title', 'category', 'summary', 'slug'], x => [x.title, x.category, x.image]],
       ['articles', 'articles', 'Actualités', 'id,title,category,image', ['title', 'category', 'excerpt', 'slug'], x => [x.title, x.category, x.image]],
@@ -191,7 +194,7 @@ module.exports = C.handler(async (req) => {
       ['subscribers', 'subscribers', 'Abonnés', 'id,email,active', ['email'], x => [x.email, x.active ? 'Actif' : 'Désinscrit']],
       ['donations', 'donations', 'Dons', 'id,reference,donor_name,amount,currency,status', ['reference', 'donor_name', 'phone'], x => [x.donor_name || x.reference, x.amount + ' ' + x.currency + ' · ' + x.status]]
     ];
-    const perm = { campaigns: 'campaigns', realisations: 'realisations', articles: 'articles', gallery: 'gallery', team: 'team', partners: 'partners', testimonials: 'testimonials', impact: 'impact', comments: 'comments', messages: 'messages', subscribers: 'subscribers', donations: 'donations' };
+    const perm = { testimonies: 'testimonies', campaigns: 'campaigns', realisations: 'realisations', articles: 'articles', gallery: 'gallery', team: 'team', partners: 'partners', testimonials: 'testimonials', impact: 'impact', comments: 'comments', messages: 'messages', subscribers: 'subscribers', donations: 'donations' };
     const groups = await Promise.all(S.filter(d => can(user, perm[d[0]])).map(async d => {
       try {
         const res = await C.rest('GET', d[1] + '?select=' + d[3] + '&or=(' + d[4].map(like).join(',') + ')&limit=6', { prefer: 'count=exact', withCount: true });
@@ -280,6 +283,75 @@ module.exports = C.handler(async (req) => {
     const updated = await pay.refresh(d, true);
     await C.audit(user, 'recheck', 'donations', d.id, { status: updated.status });
     return { item: updated };
+  }
+
+  /* ---------- Témoignages anonymes (confidentiels) ---------- */
+  if (r === 'testimonies') {
+    need(user, 'testimonies');
+    const COLS = 'id,role,category,content,allow_publish,status,public_text,published,published_at,reply,reply_public,reply_at,reply_by,campaign_id,read_at,created_at,updated_at,code_hint';
+    if (req.method === 'GET' && id) {
+      let item = await db.one('testimonies', 'select=' + COLS + '&id=eq.' + enc(id));
+      if (!item) throw new HttpError(404, 'Témoignage introuvable.');
+      if (item.status === 'new') item = await db.update('testimonies', 'id=eq.' + enc(id) + '&select=' + COLS, { status: 'read', read_at: new Date().toISOString() });
+      return { item, suggested_public_text: TM.maskPlaces(item.public_text || item.content) };
+    }
+    if (req.method === 'GET') {
+      const limit = Math.min(200, Number(req.query.limit) || 20), offset = Math.max(0, Number(req.query.offset) || 0);
+      const f = [];
+      const q = C.str(req.query.q, 100).replace(/[(),*]/g, ' ').trim();
+      if (q) f.push('or=(content.ilike.*' + enc(q) + '*,public_text.ilike.*' + enc(q) + '*,reply.ilike.*' + enc(q) + '*)');
+      if (TM.ROLES[req.query.role]) f.push('role=eq.' + req.query.role);
+      if (TM.CATEGORIES[req.query.category]) f.push('category=eq.' + req.query.category);
+      const st = String(req.query.state || '');
+      if (st === 'published') f.push('published=eq.true');
+      else if (st === 'publishable') f.push('allow_publish=eq.true&published=eq.false');
+      else if (['new', 'read', 'answered', 'archived'].includes(st)) f.push('status=eq.' + st);
+      if (req.query.from) f.push('created_at=gte.' + enc(String(req.query.from).slice(0, 10)));
+      if (req.query.to) f.push('created_at=lt.' + enc(new Date(new Date(String(req.query.to).slice(0, 10) + 'T00:00:00Z').getTime() + 86400000).toISOString()));
+      const res = await C.rest('GET', 'testimonies?select=' + COLS + (f.length ? '&' + f.join('&') : '') + '&order=created_at.desc&limit=' + limit + '&offset=' + offset, { prefer: 'count=exact', withCount: true });
+      const all = await db.select('testimonies', 'select=status,published,allow_publish,role,category');
+      const stats = { total: all.length, new: 0, read: 0, answered: 0, archived: 0, published: 0, publishable: 0, victime: 0, temoin: 0, categories: {} };
+      all.forEach(t => { stats[t.status] = (stats[t.status] || 0) + 1; if (t.published) stats.published++; if (t.allow_publish && !t.published) stats.publishable++; stats[t.role]++; stats.categories[t.category] = (stats.categories[t.category] || 0) + 1; });
+      return { items: res.data || [], total: res.count, stats, categories: TM.CATEGORIES, roles: TM.ROLES };
+    }
+    if (req.method === 'PUT' || req.method === 'PATCH') {
+      const cur = await db.one('testimonies', 'select=id,status,reply,allow_publish,published&id=eq.' + enc(id));
+      if (!cur) throw new HttpError(404, 'Témoignage introuvable.');
+      const patch = { updated_at: new Date().toISOString() };
+      if ('reply' in b) {
+        const reply = C.str(b.reply, 5000).trim();
+        patch.reply = reply || null;
+        if (reply && reply !== (cur.reply || '')) { patch.reply_at = new Date().toISOString(); patch.reply_by = user.name; if (cur.status !== 'archived') patch.status = 'answered'; }
+      }
+      if ('reply_public' in b) patch.reply_public = !!b.reply_public;
+      if ('public_text' in b) patch.public_text = C.str(b.public_text, 6000).trim() || null;
+      if ('category' in b && TM.CATEGORIES[b.category]) patch.category = b.category;
+      if ('status' in b && ['new', 'read', 'answered', 'archived'].includes(b.status)) patch.status = b.status;
+      if ('published' in b) {
+        const pub = !!b.published;
+        if (pub && !cur.allow_publish) throw new HttpError(400, "La personne n'a pas autorisé la publication de ce témoignage.");
+        if (pub && !can(user, 'publish')) throw new HttpError(403, "Vous n'avez pas l'autorisation de publier.");
+        patch.published = pub;
+        if (pub && !cur.published) {
+          patch.published_at = new Date().toISOString();
+          if (!('public_text' in b) || !patch.public_text) {
+            const full = await db.one('testimonies', 'select=content,public_text&id=eq.' + enc(id));
+            patch.public_text = TM.maskPlaces(full.public_text || full.content);
+          }
+        }
+      }
+      if (patch.public_text) patch.public_text = TM.maskPlaces(patch.public_text);
+      const item = await db.update('testimonies', 'id=eq.' + enc(id) + '&select=' + COLS, patch);
+      await C.audit(user, 'update', 'testimonies', id, { fields: Object.keys(patch) });
+      return { item };
+    }
+    if (req.method === 'DELETE') {
+      need(user, 'delete');
+      await db.remove('testimonies', 'id=eq.' + enc(id));
+      await C.audit(user, 'delete', 'testimonies', id);
+      return { ok: true };
+    }
+    throw new HttpError(405, 'Méthode non autorisée.');
   }
 
   /* ---------- Campagnes : clôture et dernière activité ---------- */

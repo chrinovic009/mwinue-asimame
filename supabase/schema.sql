@@ -318,6 +318,38 @@ create index if not exists campaigns_status_idx on campaigns(status, start_date)
 alter table campaigns enable row level security;
 revoke all on table campaigns from anon, authenticated;
 
+-- Image du hero pendant une campagne
+alter table campaigns add column if not exists hero_image text;
+
+-- Témoignages anonymes (victimes / témoins) : privés par défaut, publication après relecture et accord
+create table if not exists testimonies (
+  id uuid primary key default gen_random_uuid(),
+  code_hash text not null unique,                  -- empreinte du code MA-XXXX-XXXX (le code n'est jamais stocké)
+  code_hint text,
+  role text not null check (role in ('victime','temoin')),
+  category text not null default 'autre' check (category in ('physique','sexuelle','psychologique','economique','cyber','traditionnelle','autre')),
+  content text not null,
+  allow_publish boolean not null default false,
+  status text not null default 'new' check (status in ('new','read','answered','archived')),
+  public_text text,
+  published boolean not null default false,
+  published_at timestamptz,
+  reply text,
+  reply_public boolean not null default true,
+  reply_at timestamptz,
+  reply_by text,
+  campaign_id uuid references campaigns(id) on delete set null,
+  rate_key text,                                   -- empreinte journalière anti-abus (aucune adresse IP stockée)
+  read_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists testimonies_created_idx on testimonies(created_at desc);
+create index if not exists testimonies_pub_idx on testimonies(published, published_at desc);
+create index if not exists testimonies_rate_idx on testimonies(rate_key, created_at);
+alter table testimonies enable row level security;
+revoke all on table testimonies from anon, authenticated;
+
 -- Stockage des médias (images publiques)
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('media', 'media', true, 10485760, array['image/jpeg','image/png','image/webp','image/gif','image/svg+xml','video/mp4'])

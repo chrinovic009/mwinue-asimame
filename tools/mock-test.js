@@ -230,5 +230,40 @@ async function call(name, method, query, body, token, headers) {
   r = await call('admin', 'POST', { r: 'campaign-latest', id: cid2 }, { choice: 'no' }, s4);
   assert.equal(r.status, 200); assert.equal(T.settings.find(x => x.key === 'latest_activity').value.title, 'Test campagne', 'dernière activité inchangée');
 
+  // Témoignages anonymes : dépôt, code, lecture privée, réponse, publication masquée
+  r = await call('public', 'POST', { r: 'testimony' }, { role: 'victime', category: 'physique', content: 'court' });
+  assert.equal(r.status, 400, 'trop court');
+  r = await call('public', 'POST', { r: 'testimony' }, { role: 'temoin', category: 'sexuelle', content: "J'ai vu ma voisine frappée au quartier Kanina, avenue Lumumba à Kolwezi. Appelez +243 812 345 678.", allow_publish: true });
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  const code = r.body.code; assert.match(code, /^MA-[A-Z2-9]{4}-[A-Z2-9]{4}$/);
+  const tm = T.testimonies[T.testimonies.length - 1];
+  assert.ok(!JSON.stringify(tm).includes(code), 'le code en clair n’est jamais stocké');
+  r = await call('public', 'POST', { r: 'testimony' }, { role: 'victime', category: 'psychologique', content: 'Je ne veux pas que ce soit publié, merci de me lire.', allow_publish: false });
+  const code2 = r.body.code; const tm2 = T.testimonies[T.testimonies.length - 1];
+  r = await call('public', 'POST', { r: 'testimony-check' }, { code: code.toLowerCase().replace(/-/g, ' ') });
+  assert.equal(r.status, 200, JSON.stringify(r.body)); assert.equal(r.body.reply, null);
+  r = await call('public', 'POST', { r: 'testimony-check' }, { code: 'MA-AAAA-BBBB' });
+  assert.equal(r.status, 404);
+  r = await call('admin', 'GET', { r: 'testimonies', state: 'new' }, null, s4);
+  assert.equal(r.status, 200, JSON.stringify(r.body)); assert.equal(r.body.total, 2); assert.ok(!('code_hash' in r.body.items[0]), 'empreinte jamais exposée');
+  r = await call('admin', 'GET', { r: 'testimonies', id: tm.id }, null, s4);
+  assert.equal(r.body.item.status, 'read');
+  assert.ok(!/Kolwezi|Kanina|Lumumba|812/.test(r.body.suggested_public_text), r.body.suggested_public_text);
+  r = await call('admin', 'PUT', { r: 'testimonies', id: tm2.id }, { published: true }, s4);
+  assert.equal(r.status, 400, 'publication refusée sans consentement');
+  r = await call('admin', 'PUT', { r: 'testimonies', id: tm.id }, { reply: 'Merci pour votre courage. Contactez la ligne d’écoute.', published: true }, s4);
+  assert.equal(r.status, 200, JSON.stringify(r.body)); assert.equal(r.body.item.status, 'answered'); assert.equal(r.body.item.published, true);
+  r = await call('public', 'GET', { r: 'testimonies' });
+  assert.equal(r.body.items.length, 1);
+  assert.ok(!/Kolwezi|Kanina|Lumumba|812/.test(JSON.stringify(r.body.items)), JSON.stringify(r.body.items));
+  assert.ok(r.body.items[0].reply);
+  r = await call('public', 'POST', { r: 'testimony-check' }, { code });
+  assert.ok(r.body.reply && r.body.published);
+  r = await call('admin', 'PUT', { r: 'testimonies', id: tm.id }, { published: false }, s4);
+  r = await call('public', 'GET', { r: 'testimonies' });
+  assert.equal(r.body.items.length, 0, 'retiré du site');
+  r = await call('admin', 'GET', { r: 'dashboard' }, null, s4);
+  assert.equal(r.body.counts.testimonies_new, 1);
+
   console.log('✅ Tous les tests de l’API sont passés (' + T.audit_log.length + ' entrées de journal).');
 })().catch(e => { console.error('❌', e); process.exit(1); });

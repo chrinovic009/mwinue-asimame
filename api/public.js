@@ -3,6 +3,7 @@
 const C = require('../lib/core');
 const { db, enc, HttpError } = C;
 const camp = require('../lib/campaigns');
+const TM = require('../lib/testimonies');
 
 const TYPES = { realisation: 'realisations', article: 'articles' };
 const CARD_R = 'id,slug,title,heading,category,image,summary,event_date,location,featured,views,likes,created_at,sort';
@@ -127,6 +128,12 @@ module.exports = C.handler(async (req, res) => {
       roots.reverse();
       return { items: roots, total: rows.length };
     }
+    /* ----- Témoignages publiés (anonymes, relus et autorisés) ----- */
+    if (r === 'testimonies') {
+      const rows = await db.select('testimonies', 'select=id,role,category,content,public_text,reply,reply_public,published_at,created_at&published=eq.true&allow_publish=eq.true&order=published_at.desc&limit=30');
+      cache(res, 30);
+      return { items: rows.map(TM.publicItem) };
+    }
     if (r === 'my-likes') {
       const v = visitor(req, null);
       if (!v) return { items: [] };
@@ -207,6 +214,46 @@ module.exports = C.handler(async (req, res) => {
     return {
       comment: { id: c.id, parent_id: c.parent_id, author_name: c.author_name, content: c.content, is_staff: false, likes: 0, created_at: c.created_at, replies: [] },
       pending: status === 'pending'
+    };
+  }
+
+  /* ----- Dépôt d'un témoignage anonyme ----- */
+  if (r === 'testimony') {
+    if (b.website) throw new HttpError(400, 'Requête refusée.');
+    const role = C.str(b.role, 20), category = C.str(b.category, 20) || 'autre';
+    const content = C.str(b.content, 6000).trim();
+    if (!TM.ROLES[role]) throw new HttpError(400, 'Indiquez si vous êtes victime ou témoin.');
+    if (!TM.CATEGORIES[category]) throw new HttpError(400, 'Catégorie invalide.');
+    if (content.length < 20) throw new HttpError(400, 'Votre témoignage est trop court (20 caractères minimum).');
+    const key = TM.rateKey(req);
+    const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    if (await db.count('testimonies', 'rate_key=eq.' + key + '&created_at=gte.' + enc(since)) >= 4) throw new HttpError(429, 'Trop de dépôts en peu de temps. Réessayez un peu plus tard.');
+    let campaignId = null;
+    try { const c = await db.one('campaigns', 'select=id&status=eq.active&published=eq.true&order=start_date.asc'); campaignId = c ? c.id : null; } catch (e) { /* */ }
+    let code, tries = 0;
+    for (;;) {
+      code = TM.newCode();
+      try {
+        await db.insert('testimonies', {
+          code_hash: TM.codeHash(code), code_hint: code.slice(-4), role, category, content,
+          allow_publish: b.allow_publish === true || b.allow_publish === 'true', campaign_id: campaignId, rate_key: key
+        }, 'return=minimal');
+        break;
+      } catch (e) { if (e.status === 409 && ++tries < 5) continue; throw e; }
+    }
+    return { code };
+  }
+  /* ----- Lecture privée de la réponse avec le code anonyme ----- */
+  if (r === 'testimony-check') {
+    const code = TM.normalizeCode(b.code);
+    if (!code) throw new HttpError(400, 'Code invalide. Il ressemble à MA-XXXX-XXXX.');
+    const t = await db.one('testimonies', 'select=role,category,status,content,allow_publish,published,reply,reply_at,created_at&code_hash=eq.' + TM.codeHash(code));
+    if (!t) throw new HttpError(404, 'Aucun témoignage ne correspond à ce code. Vérifiez-le.');
+    return {
+      created_at: t.created_at, role: TM.ROLES[t.role], category: TM.CATEGORIES[t.category],
+      status: t.reply ? 'Réponse disponible' : (TM.STATUS[t.status] || 'Reçu'),
+      content: t.content, published: !!t.published, allow_publish: !!t.allow_publish,
+      reply: t.reply || null, reply_at: t.reply_at || null
     };
   }
 

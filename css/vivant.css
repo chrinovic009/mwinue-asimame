@@ -1,0 +1,77 @@
+/* =====================================================
+   MWAS — Moins de texte, plus de vie : icônes, puces visuelles, animations
+   ===================================================== */
+
+/* Hero : une ligne + pastilles animées */
+.hero-lead { font-weight: 500; }
+.hero-pills { list-style: none; padding: 0; margin: -.5rem 0 1.8rem; display: flex; flex-wrap: wrap; gap: .5rem; }
+.hero-pills li { display: inline-flex; align-items: center; gap: .45rem; padding: .5rem .95rem; border-radius: 999px; background: #fff; box-shadow: 0 8px 20px rgba(50, 24, 15, .08); font-weight: 700; font-size: .92rem; color: var(--n-navy, #32180F); opacity: 0; animation: vv-pop .6s cubic-bezier(.2, 1.3, .4, 1) forwards; }
+.hero-pills li:nth-child(1) { animation-delay: .5s; } .hero-pills li:nth-child(2) { animation-delay: .65s; }
+.hero-pills li:nth-child(3) { animation-delay: .8s; } .hero-pills li:nth-child(4) { animation-delay: .95s; }
+.hero-pills i { color: var(--n-primary, #A5481D); font-size: 1.05rem; }
+.hero-pills li:hover i { animation: vv-wiggle .5s ease; }
+@media (max-width: 991.98px) { .hero-pills { justify-content: center; } }
+
+/* Cartes : une accroche courte au lieu d'un paragraphe */
+.card-tagline { font-weight: 600; color: var(--n-primary, #A5481D); font-size: .92rem; letter-spacing: .01em; margin-bottom: 1rem; }
+.card-premium { transition: transform .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s; position: relative; }
+.card-premium:hover { transform: translateY(-8px); box-shadow: 0 24px 50px rgba(50, 24, 15, .14); }
+.card-premium .icon-box { transition: transform .4s cubic-bezier(.2, 1.4, .4, 1); }
+.card-premium:hover .icon-box { transform: scale(1.12) rotate(-6deg); }
+
+/* Démarche en 4 étapes : grande icône, une phrase */
+.process-step--icon { text-align: center; position: relative; padding-top: .5rem; }
+.process-icon { width: 84px; height: 84px; margin: 0 auto 1rem; border-radius: 26px; display: flex; align-items: center; justify-content: center; font-size: 2.1rem; color: #fff; background: linear-gradient(135deg, #E8611A, #A5481D); box-shadow: 0 16px 34px rgba(232, 97, 26, .3); transition: transform .4s cubic-bezier(.2, 1.4, .4, 1); position: relative; z-index: 1; }
+.process-step--icon:hover .process-icon { transform: translateY(-6px) rotate(-6deg); }
+.process-step--icon .process-number { position: absolute; top: 0; left: calc(50% + 26px); z-index: 2; width: 34px; height: 34px; border-radius: 50%; background: #F2B72C; color: #32180F; font-size: .8rem; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(0, 0, 0, .15); }
+.process-step--icon p { color: var(--n-slate, #7a6458); font-weight: 500; margin: 0; }
+@media (min-width: 992px) {
+  .process-row { position: relative; }
+  .process-row::before { content: ""; position: absolute; top: 50px; left: 12%; right: 12%; height: 3px; background: repeating-linear-gradient(90deg, rgba(232, 97, 26, .45) 0 12px, transparent 12px 22px); background-size: 44px 3px; animation: vv-march 1.6s linear infinite; }
+}
+
+/* Grilles d'actions (à la place des listes de phrases) */
+.how-grid { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; }
+.how-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.how-grid li { display: flex; flex-direction: column; align-items: center; gap: .45rem; padding: 1rem .5rem; border-radius: 18px; background: #fff; box-shadow: 0 10px 26px rgba(50, 24, 15, .07); font-weight: 700; font-size: .9rem; color: var(--n-navy, #32180F); transition: transform .3s, box-shadow .3s; text-align: center; }
+.how-grid li:hover { transform: translateY(-5px); box-shadow: 0 18px 36px rgba(50, 24, 15, .12); }
+.how-grid i { font-size: 1.7rem; color: var(--n-primary, #A5481D); transition: transform .4s cubic-bezier(.2, 1.4, .4, 1); }
+.how-grid li:hover i { transform: scale(1.2); }
+@media (max-width: 575.98px) { .how-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .how-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Dernière activité : 3 lignes max + puces en pastilles */
+.la-text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.la-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.la-chips li { margin: 0 !important; padding: .5rem .9rem .5rem .55rem; border-radius: 999px; background: #fff; box-shadow: 0 6px 16px rgba(50, 24, 15, .07); align-items: center; }
+.la-chips li i { margin: 0 .35rem 0 0 !important; }
+
+/* Textes longs saisis dans l'admin : aperçu court */
+#teamGrid .card-premium p.small { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.activity-flip-back p { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.blog-card-body p.small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Pied de page : la devise */
+.footer-motto { font-family: var(--n-font-display, 'Sora', sans-serif); font-weight: 700; font-size: 1.05rem; color: rgba(255, 255, 255, .85); }
+.footer-motto span:nth-child(2) { color: #F2B72C; }
+.footer-motto span:nth-child(3) { color: var(--n-primary, #E8611A); }
+
+/* Titres de section : trait animé */
+.section-title { position: relative; }
+.section-header .eyebrow { animation: vv-glow 3.5s ease-in-out infinite; }
+
+/* Chiffres clés */
+.stat-number { transition: transform .3s; }
+.stat-item:hover .stat-number { transform: scale(1.08); }
+
+/* Partenaires */
+.logo-cloud-item img { transition: transform .3s, filter .3s; }
+.logo-cloud-item:hover img { transform: scale(1.08); }
+
+@keyframes vv-pop { from { opacity: 0; transform: translateY(12px) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes vv-wiggle { 25% { transform: rotate(-14deg); } 75% { transform: rotate(14deg); } }
+@keyframes vv-march { to { background-position: 44px 0; } }
+@keyframes vv-glow { 50% { box-shadow: 0 0 0 6px rgba(232, 97, 26, .08); } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-pills li { opacity: 1; animation: none; }
+  .process-row::before, .section-header .eyebrow { animation: none; }
+}

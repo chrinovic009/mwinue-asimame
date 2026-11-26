@@ -243,6 +243,7 @@
     { id: 'home', label: "Page d'accueil", icon: 'house-heart', perm: 'home' },
     { group: 'Contenus' },
     { id: 'campaigns', label: 'Campagnes & mobilisations', icon: 'megaphone', perm: 'campaigns', badge: 'campaigns_decide' },
+    { id: 'testimonies', label: 'Témoignages anonymes', icon: 'shield-lock', perm: 'testimonies', badge: 'testimonies_new' },
     { id: 'realisations', label: 'Réalisations', icon: 'flag', perm: 'realisations' },
     { id: 'articles', label: 'Actualités', icon: 'newspaper', perm: 'articles' },
     { id: 'gallery', label: 'Galerie', icon: 'images', perm: 'gallery' },
@@ -324,7 +325,7 @@
   /* ---------------- Recherche globale ---------------- */
   (function globalSearch() {
     const box = $('#globalSearch'), input = $('#globalSearchInput'), out = $('#globalSearchResults');
-    const ICONS = { campaigns: 'megaphone', realisations: 'flag', articles: 'newspaper', gallery: 'images', team: 'people', partners: 'buildings', testimonials: 'chat-quote', impact: 'graph-up-arrow', comments: 'chat-dots', messages: 'envelope', subscribers: 'send-check', donations: 'cash-coin', users: 'person-lock', nav: 'arrow-right-circle' };
+    const ICONS = { testimonies: 'shield-lock', campaigns: 'megaphone', realisations: 'flag', articles: 'newspaper', gallery: 'images', team: 'people', partners: 'buildings', testimonials: 'chat-quote', impact: 'graph-up-arrow', comments: 'chat-dots', messages: 'envelope', subscribers: 'send-check', donations: 'cash-coin', users: 'person-lock', nav: 'arrow-right-circle' };
     const OPENABLE = ['realisations', 'articles', 'gallery', 'team', 'partners', 'testimonials', 'impact'];
     let timer, seq = 0, active = -1;
     function linkFor(key, it, q) {
@@ -638,6 +639,7 @@
         { name: 'headline_highlight', label: 'Suite du titre (en couleur)', col: 'col-md-6', placeholder: 'contre les violences basées sur le genre' },
         { name: 'lead', label: 'Texte de présentation', type: 'textarea', rows: 4 },
         { name: 'poster', label: 'Affiche (affichée sur le site)', type: 'image', folder: 'campagnes' },
+        { name: 'hero_image', label: "Image de la section d'accueil (hero) pendant la campagne", type: 'image', folder: 'campagnes', help: 'Photo affichée en haut de la page d’accueil avec le compte à rebours. À défaut, l’affiche est utilisée.' },
         { name: 'poster_full', label: 'Affiche haute résolution (bouton « Télécharger »)', type: 'image', folder: 'campagnes', help: 'Facultative : à défaut, l’affiche ci-dessus est proposée au téléchargement.' },
         { name: 'themes', label: 'Thèmes abordés', type: 'list', long: false, labels: ['Thème (ex. Violence physique)'], addLabel: 'Ajouter un thème' },
         { name: 'pillars', label: "Axes d'engagement", type: 'pairs', labels: ['Axe (ex. Former)', 'Description'], addLabel: 'Ajouter un axe' },
@@ -1030,6 +1032,101 @@
         try { const v = readForm(box, fields); busy(btn, true); await api('admin?r=settings&key=latest_activity', { method: 'PUT', body: { value: v } }); toast('Accueil mis à jour.'); }
         catch (err) { toast(err.message, 'error'); } finally { busy(btn, false); }
       });
+    },
+
+    async testimonies(view) {
+      const CAT = { physique: ['Physique', 'hand-index-thumb'], sexuelle: ['Sexuelle', 'shield-exclamation'], psychologique: ['Psychologique', 'emoji-frown'], economique: ['Économique', 'cash-coin'], cyber: ['Cyberharcèlement', 'phone-vibrate'], traditionnelle: ['Pratiques néfastes', 'exclamation-octagon'], autre: ['Autre', 'three-dots'] };
+      const STATE = { new: ['Nouveau', 'pill-warn'], read: ['Lu', 'pill-off'], answered: ['Répondu', 'pill-on'], archived: ['Archivé', 'pill-off'] };
+      const ago = d => { const n = Math.floor((Date.now() - new Date(d)) / 86400000); return n <= 0 ? "aujourd'hui" : n === 1 ? 'hier' : 'il y a ' + n + ' jours'; };
+      let items = [], stats = null;
+      const st = listController(view, 'testimonies', load);
+      view.innerHTML = '<div class="tm-admin-intro"><i class="bi bi-shield-lock-fill"></i><div><strong>Espace confidentiel.</strong> Les témoignages arrivent ici en privé. Aucun nom, aucune adresse ne sont demandés ; seuls ceux autorisés par leur auteur peuvent être publiés, et les lieux sont masqués automatiquement.</div></div>' +
+        '<div class="tm-stats" data-stats></div>' +
+        '<div class="toolbar">' + searchBox(st, 'Rechercher dans les témoignages…') +
+        '<select class="form-select w-auto" data-f="state"><option value="">Tous les états</option><option value="new">Nouveaux</option><option value="read">Lus</option><option value="answered">Répondus</option><option value="publishable">Publication autorisée (non publiés)</option><option value="published">Publiés sur le site</option><option value="archived">Archivés</option></select>' +
+        '<select class="form-select w-auto" data-f="role"><option value="">Victimes et témoins</option><option value="victime">Victimes</option><option value="temoin">Témoins</option></select>' +
+        '<select class="form-select w-auto" data-f="category"><option value="">Toutes les catégories</option>' + Object.keys(CAT).map(k => '<option value="' + k + '">' + CAT[k][0] + '</option>').join('') + '</select>' +
+        '<input type="date" class="form-control w-auto" data-f="from" title="Depuis le"><input type="date" class="form-control w-auto" data-f="to" title="Jusqu\'au">' +
+        '</div><div data-list></div>';
+      async function load() {
+        const r = await api('admin?r=testimonies&' + st.query());
+        items = r.items; stats = r.stats; draw(r.total);
+      }
+      function drawStats() {
+        const box = $('[data-stats]', view); if (!stats) return;
+        const s = (n, label, icon, f, v) => '<button type="button" class="tm-stat' + (st.filters[f] === v ? ' on' : '') + '" data-quick="' + f + ':' + v + '"><i class="bi bi-' + icon + '"></i><b>' + fmtNum(n || 0) + '</b><span>' + label + '</span></button>';
+        box.innerHTML = s(stats.total, 'Au total', 'inboxes', 'state', '') + s(stats.new, 'Nouveaux', 'bell', 'state', 'new') + s(stats.answered, 'Répondus', 'reply', 'state', 'answered') +
+          s(stats.publishable, 'À publier ?', 'hourglass-split', 'state', 'publishable') + s(stats.published, 'Publiés', 'globe2', 'state', 'published') +
+          s(stats.victime, 'Victimes', 'person-heart', 'role', 'victime') + s(stats.temoin, 'Témoins', 'eye', 'role', 'temoin');
+      }
+      function draw(total) {
+        drawStats();
+        const list = $('[data-list]', view);
+        if (!items.length) { list.innerHTML = '<div class="panel empty"><i class="bi bi-shield-check"></i>' + (st.q || Object.values(st.filters).some(Boolean) ? 'Aucun témoignage pour ces filtres.' : 'Aucun témoignage reçu pour le moment.') + '</div>'; return; }
+        list.innerHTML = '<div class="tm-list">' + items.map(t => {
+          const c = CAT[t.category] || CAT.autre, s2 = STATE[t.status] || STATE.read;
+          return '<article class="tm-item' + (t.status === 'new' ? ' is-new' : '') + '" data-id="' + t.id + '">' +
+            '<div class="tm-item-head"><span class="tm-cat-ic"><i class="bi bi-' + c[1] + '"></i></span><div class="flex-grow-1"><div class="cell-title">' + (t.role === 'victime' ? 'Victime' : 'Témoin') + ' · ' + c[0] + '</div>' +
+            '<div class="cell-sub"><i class="bi bi-calendar3 me-1"></i>' + fmtDateTime(t.created_at) + ' · ' + ago(t.created_at) + ' · code …' + esc(t.code_hint || '') + '</div></div>' +
+            '<div class="tm-pills"><span class="pill ' + s2[1] + '">' + s2[0] + '</span>' + (t.published ? '<span class="pill pill-on"><i class="bi bi-globe2"></i> Publié</span>' : t.allow_publish ? '<span class="pill pill-warn">Publication autorisée</span>' : '<span class="pill pill-off"><i class="bi bi-lock"></i> Privé</span>') + '</div></div>' +
+            '<p class="tm-item-text">' + esc(String(t.content).slice(0, 260)) + (t.content.length > 260 ? '…' : '') + '</p>' +
+            (t.reply ? '<div class="tm-item-reply"><i class="bi bi-reply-fill"></i> ' + esc(String(t.reply).slice(0, 140)) + (t.reply.length > 140 ? '…' : '') + ' <span class="cell-sub">— ' + esc(t.reply_by || '') + ', ' + fmtDate(t.reply_at) + '</span></div>' : '') +
+            '<div class="row-actions justify-content-start mt-2"><button class="btn btn-brand btn-sm" data-open><i class="bi bi-chat-heart me-1"></i>Lire et répondre</button>' +
+            (t.allow_publish && can('publish') ? '<button class="btn btn-sm ' + (t.published ? 'btn-light' : 'btn-soft') + '" data-pub><i class="bi bi-' + (t.published ? 'eye-slash' : 'globe2') + ' me-1"></i>' + (t.published ? 'Retirer du site' : 'Publier anonymement') + '</button>' : '') +
+            (t.status !== 'archived' ? '<button class="btn btn-light btn-sm" data-archive title="Archiver"><i class="bi bi-archive"></i></button>' : '<button class="btn btn-light btn-sm" data-unarchive title="Désarchiver"><i class="bi bi-box-arrow-up"></i></button>') +
+            (can('delete') ? '<button class="btn btn-light btn-sm text-danger" data-del title="Supprimer"><i class="bi bi-trash"></i></button>' : '') + '</div></article>';
+        }).join('') + '</div>' + pagerHtml(total, st.page, st.size);
+      }
+      async function openItem(id) {
+        let r;
+        try { r = await api('admin?r=testimonies&id=' + encodeURIComponent(id)); } catch (err) { return toast(err.message, 'error'); }
+        const t = r.item, c = CAT[t.category] || CAT.autre;
+        const canPub = t.allow_publish && can('publish');
+        infoModal((t.role === 'victime' ? 'Victime' : 'Témoin') + ' · ' + c[0],
+          '<div class="tm-detail">' +
+          '<div class="tm-detail-meta"><span><i class="bi bi-calendar3"></i>' + fmtDateTime(t.created_at) + '</span><span><i class="bi bi-key"></i>Code …' + esc(t.code_hint || '') + '</span>' +
+          (t.allow_publish ? '<span class="text-success"><i class="bi bi-check-circle"></i>Publication autorisée par la personne</span>' : '<span><i class="bi bi-lock"></i>Ne pas publier (refusé par la personne)</span>') + '</div>' +
+          '<label class="form-label fw-semibold small mt-3">Témoignage reçu (privé)</label><div class="tm-detail-text">' + esc(t.content) + '</div>' +
+          '<form data-tform>' +
+          '<div class="row g-3 mt-1"><div class="col-sm-6"><label class="form-label fw-semibold small">Catégorie</label><select class="form-select" name="category">' + Object.keys(CAT).map(k => '<option value="' + k + '"' + (k === t.category ? ' selected' : '') + '>' + CAT[k][0] + '</option>').join('') + '</select></div>' +
+          '<div class="col-sm-6"><label class="form-label fw-semibold small">État</label><select class="form-select" name="status">' + Object.keys(STATE).map(k => '<option value="' + k + '"' + (k === t.status ? ' selected' : '') + '>' + STATE[k][0] + '</option>').join('') + '</select></div></div>' +
+          '<label class="form-label fw-semibold small mt-3"><i class="bi bi-heart-fill text-brand me-1"></i>Réponse de soutien</label>' +
+          '<textarea class="form-control" name="reply" rows="5" placeholder="Merci pour votre courage… (la personne la lira avec son code)">' + esc(t.reply || '') + '</textarea>' +
+          '<div class="form-check form-switch mt-2"><input class="form-check-input" type="checkbox" role="switch" id="tmReplyPub" name="reply_public"' + (t.reply_public !== false ? ' checked' : '') + '><label class="form-check-label small" for="tmReplyPub">Afficher aussi la réponse sous le témoignage publié</label></div>' +
+          (t.allow_publish ? '<label class="form-label fw-semibold small mt-3"><i class="bi bi-globe2 text-brand me-1"></i>Version publiée (relue, lieux masqués)</label>' +
+            '<textarea class="form-control" name="public_text" rows="5">' + esc(t.public_text || r.suggested_public_text || '') + '</textarea>' +
+            '<div class="help"><i class="bi bi-shield-check me-1"></i>Villes, quartiers, avenues, numéros et e-mails sont remplacés automatiquement par « [lieu masqué] ». Vérifiez qu’aucun nom ne permet d’identifier quelqu’un.</div>' : '') +
+          '<p class="text-danger small mt-2 mb-0" data-terr></p>' +
+          '<div class="d-flex flex-wrap gap-2 mt-3"><button class="btn btn-brand" type="submit"><i class="bi bi-check2 me-1"></i>Enregistrer la réponse</button>' +
+          (canPub ? '<button class="btn ' + (t.published ? 'btn-light' : 'btn-soft') + '" type="button" data-tpub><i class="bi bi-' + (t.published ? 'eye-slash' : 'globe2') + ' me-1"></i>' + (t.published ? 'Retirer du site' : 'Enregistrer et publier anonymement') + '</button>' : '') +
+          '</div></form></div>');
+        const form = $('#infoBody [data-tform]');
+        const values = () => { const v = { category: form.category.value, status: form.status.value, reply: form.reply.value, reply_public: form.reply_public.checked }; if (form.public_text) v.public_text = form.public_text.value; return v; };
+        const send = async (extra, btn, msg) => {
+          busy(btn, true);
+          try { await api('admin?r=testimonies&id=' + t.id, { method: 'PUT', body: Object.assign(values(), extra || {}) }); toast(msg); bootstrap.Modal.getInstance($('#infoModal')).hide(); load(); refreshCounts(); }
+          catch (err) { $('[data-terr]', form).textContent = err.message; } finally { busy(btn, false); }
+        };
+        form.addEventListener('submit', e => { e.preventDefault(); send(null, $('button[type=submit]', form), 'Réponse enregistrée : la personne peut la lire avec son code.'); });
+        const pb = $('[data-tpub]', form);
+        if (pb) pb.addEventListener('click', () => send({ published: !t.published }, pb, t.published ? 'Témoignage retiré du site.' : 'Témoignage publié anonymement sur le site.'));
+        load();
+      }
+      view.addEventListener('click', async e => {
+        const q = e.target.closest('[data-quick]');
+        if (q) { const [f, v] = q.dataset.quick.split(':'); st.filters.state = ''; st.filters.role = ''; st.filters[f] = v; $$('[data-f]', view).forEach(s => { s.value = st.filters[s.dataset.f] || ''; }); return st.reload(true); }
+        const art = e.target.closest('[data-id]'); if (!art) return;
+        const t = items.find(i => i.id === art.dataset.id);
+        try {
+          if (e.target.closest('[data-open]')) return openItem(t.id);
+          if (e.target.closest('[data-pub]')) { await api('admin?r=testimonies&id=' + t.id, { method: 'PUT', body: { published: !t.published } }); toast(t.published ? 'Retiré du site.' : 'Publié anonymement (lieux masqués).'); return load(); }
+          if (e.target.closest('[data-archive]')) { await api('admin?r=testimonies&id=' + t.id, { method: 'PUT', body: { status: 'archived' } }); toast('Archivé.'); load(); return refreshCounts(); }
+          if (e.target.closest('[data-unarchive]')) { await api('admin?r=testimonies&id=' + t.id, { method: 'PUT', body: { status: t.reply ? 'answered' : 'read' } }); toast('Désarchivé.'); return load(); }
+          if (e.target.closest('[data-del]') && confirmDel('ce témoignage')) { await api('admin?r=testimonies&id=' + t.id, { method: 'DELETE' }); toast('Supprimé.'); load(); refreshCounts(); }
+        } catch (err) { toast(err.message, 'error'); }
+      });
+      await load();
+      const open = hashParams().get('open'); if (open) openItem(open);
     },
 
     async campaigns(view) {

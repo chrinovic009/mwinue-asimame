@@ -224,3 +224,28 @@ h1, h2, h3, h4, h5, .auth-title { font-family: 'Sora', sans-serif; }
   .stat-value { font-size: 1.15rem; word-break: break-word; }
   .chart-box { height: 240px !important; }
 }
+
+/* ---------- Témoignages anonymes ---------- */
+.tm-admin-intro { display: flex; gap: .8rem; align-items: flex-start; background: #32180F; color: #FFF1D6; border-radius: 16px; padding: 1rem 1.1rem; margin-bottom: 1rem; font-size: .88rem; }
+.tm-admin-intro > i { font-size: 1.5rem; color: #F2B72C; }
+.tm-admin-intro strong { color: #fff; }
+.tm-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: .6rem; margin-bottom: 1rem; }
+.tm-stat { display: flex; flex-direction: column; align-items: flex-start; gap: .1rem; padding: .75rem .85rem; border-radius: 14px; border: 1px solid var(--line); background: #fff; text-align: left; transition: transform .15s, border-color .15s; cursor: pointer; }
+.tm-stat:hover { transform: translateY(-2px); }
+.tm-stat.on { border-color: #E8611A; background: #fff3ea; }
+.tm-stat i { color: #E8611A; font-size: 1.1rem; }
+.tm-stat b { font-size: 1.3rem; line-height: 1.1; }
+.tm-stat span { font-size: .75rem; color: #8a7468; }
+.tm-list { display: grid; gap: .75rem; }
+.tm-item { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.1rem; }
+.tm-item.is-new { border-left: 4px solid #E8611A; }
+.tm-item-head { display: flex; flex-wrap: wrap; gap: .7rem; align-items: center; }
+.tm-cat-ic { width: 40px; height: 40px; border-radius: 12px; background: #fff3ea; color: #E8611A; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex: 0 0 auto; }
+.tm-pills { display: flex; flex-wrap: wrap; gap: .35rem; }
+.tm-item-text { margin: .7rem 0 0; font-size: .92rem; white-space: pre-line; color: #3d2a22; }
+.tm-item-reply { margin-top: .6rem; font-size: .85rem; background: #f7f1eb; border-radius: 10px; padding: .5rem .7rem; }
+.tm-item-reply i { color: #E8611A; }
+.tm-detail-meta { display: flex; flex-wrap: wrap; gap: .4rem 1rem; font-size: .82rem; color: #8a7468; }
+.tm-detail-meta i { margin-right: .3rem; }
+.tm-detail-text { white-space: pre-line; background: #f7f1eb; border-radius: 12px; padding: .9rem 1rem; font-size: .95rem; max-height: 280px; overflow-y: auto; }
+@media (max-width: 767.98px) { .toolbar input[type=date] { flex: 1 1 calc(50% - .3rem); width: auto !important; } }

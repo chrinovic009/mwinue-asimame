@@ -19,7 +19,7 @@
     var bullets = Array.isArray(la.bullets) ? la.bullets : [];
     ul.innerHTML = bullets.map(function (b) {
       var t = Array.isArray(b) ? b : [b, ''];
-      return '<li><i class="bi bi-check"></i><div><strong class="text-navy">' + esc(t[0]) + '</strong>' + (t[1] ? ' — ' + esc(t[1]) : '') + '</div></li>';
+      return '<li><i class="bi bi-check"></i><div><strong class="text-navy">' + esc(t[0]) + '</strong></div></li>';
     }).join('');
     ul.hidden = !bullets.length;
     var btn = box.querySelector('[data-la="button"]');

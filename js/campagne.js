@@ -110,13 +110,76 @@
     else window.open('https://wa.me/?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
   });
 
+  /* ---------- Hero : campagne en cours + compte à rebours ---------- */
+  var RIBBON = '<svg viewBox="0 0 40 56" aria-hidden="true"><path d="M20 4c-6 0-10 4.5-10 10.5 0 4.6 3 9.4 6.4 14.1L6 49l7 3 7-15.6L27 52l7-3-10.4-20.4C27 23.9 30 19.1 30 14.5 30 8.5 26 4 20 4Zm0 6c2.6 0 4.3 2 4.3 4.6 0 2.4-1.7 5.6-4.3 9.3-2.6-3.7-4.3-6.9-4.3-9.3C15.7 12 17.4 10 20 10Z"/></svg>';
+  var heroTimer = null;
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function hero(c) {
+    var heroEl = document.querySelector('header.hero'), visual = heroEl && heroEl.querySelector('.hero-visual');
+    if (!visual || !c || !c.start_date) return;
+    var img = c.hero_image || c.poster;
+    if (img) {
+      var cov = visual.querySelector('.hero-video-cover img'); if (cov) { cov.src = img; cov.alt = c.title; }
+      var v = visual.querySelector('video'); if (v) v.setAttribute('poster', img);
+    }
+    heroEl.classList.add('hero--campaign');
+    if (!heroEl.querySelector('.hc-float')) {
+      var fl = document.createElement('div'); fl.className = 'hc-float'; fl.setAttribute('aria-hidden', 'true');
+      fl.innerHTML = [1, 2, 3, 4, 5, 6].map(function (i) { return '<span style="--i:' + i + '">' + RIBBON + '</span>'; }).join('');
+      heroEl.insertBefore(fl, heroEl.firstChild);
+    }
+    var w = visual.querySelector('.hc-widget');
+    if (!w) { w = document.createElement('div'); w.className = 'hc-widget'; visual.appendChild(w); }
+    var link = '#' + (c.id ? 'campagne-' + c.id : 'campagne-vbg');
+    w.innerHTML = '<a class="hc-chip" href="' + link + '"><span class="hc-live"></span><span data-hc-state>En cours</span></a>' +
+      '<div class="hc-card"><div class="hc-top"><span class="hc-ribbon">' + RIBBON + '</span><div class="hc-title"><strong>' + esc(c.title) + '</strong><small data-hc-day></small></div></div>' +
+      '<div class="hc-label" data-hc-label>Fin dans</div>' +
+      '<div class="hc-count"><div><b data-u="d">--</b><span>jours</span></div><div><b data-u="h">--</b><span>heures</span></div><div><b data-u="m">--</b><span>min</span></div><div><b data-u="s">--</b><span>sec</span></div></div>' +
+      '<div class="hc-bar"><span data-hc-bar></span></div>' +
+      '<div class="hc-actions"><a href="' + link + '" class="hc-btn"><i class="bi bi-eye"></i> Découvrir</a><button type="button" class="hc-btn hc-btn-alt" data-tm-open="form"><i class="bi bi-shield-lock"></i> Témoigner</button></div></div>';
+    var start = new Date(c.start_date + 'T00:00:00+02:00').getTime();
+    var end = c.end_date ? new Date(c.end_date + 'T23:59:59+02:00').getTime() : 0;
+    var total = c.end_date ? diff(c.start_date, c.end_date) + 1 : 0;
+    var word = c.kind === 'mobilisation' ? 'Mobilisation' : 'Campagne';
+    function tick() {
+      var now = Date.now(), target, before = now < start;
+      if (before) target = start; else if (end && now <= end) target = end; else if (!end) target = 0; else { w.classList.add('is-over'); w.querySelector('[data-hc-state]').textContent = word + ' terminée'; w.querySelector('[data-hc-label]').textContent = 'Merci pour votre mobilisation'; clearInterval(heroTimer); return; }
+      var day = diff(c.start_date, today()) + 1;
+      w.querySelector('[data-hc-state]').textContent = before ? 'Bientôt' : word + ' en cours';
+      w.querySelector('[data-hc-day]').textContent = before ? 'Lancement le ' + frDate(c.start_date, true) : 'Jour ' + day + (total ? ' sur ' + total : '');
+      w.querySelector('[data-hc-label]').textContent = before ? 'Lancement dans' : (target ? 'Fin dans' : 'Mobilisation en cours');
+      var left = Math.max(0, (target || now) - now) / 1000;
+      var u = { d: Math.floor(left / 86400), h: Math.floor(left % 86400 / 3600), m: Math.floor(left % 3600 / 60), s: Math.floor(left % 60) };
+      Object.keys(u).forEach(function (k) { var el = w.querySelector('[data-u="' + k + '"]'); var v = k === 'd' ? String(u[k]) : pad(u[k]); if (el.textContent !== v) { el.textContent = v; el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); } });
+      w.querySelector('.hc-count').hidden = !target;
+      var pct = before || !total ? 0 : Math.min(100, (now - start) / (end - start) * 100);
+      w.querySelector('[data-hc-bar]').style.width = pct + '%';
+    }
+    clearInterval(heroTimer); tick(); heroTimer = setInterval(tick, 1000);
+  }
+  function pickHero(list) {
+    var t = today();
+    var live = list.filter(function (c) { return c.start_date <= t && (!c.end_date || c.end_date >= t); });
+    return live[0] || list[0];
+  }
+  function announce() { document.dispatchEvent(new CustomEvent('mwas:campaigns')); }
+
   /* ---------- Données de l'administration ---------- */
   var model = document.querySelector('.campaign-vbg');
-  if (model) setup(model); // repli statique immédiat
+  if (model) {
+    setup(model); // repli statique immédiat
+    hero({ title: model.dataset.title, start_date: model.dataset.start, end_date: model.dataset.end, kind: model.dataset.kind, hero_image: model.dataset.hero });
+  }
   document.addEventListener('mwas:site', function (e) {
     var list = e.detail && e.detail.campaigns;
     if (!model || !Array.isArray(list)) return; // API indisponible : on garde la version statique
-    if (!list.length) { model.hidden = true; return; }
+    if (!list.length) {
+      model.hidden = true; clearInterval(heroTimer);
+      var hw = document.querySelector('.hc-widget'); if (hw) hw.remove();
+      var hf = document.querySelector('.hc-float'); if (hf) hf.remove();
+      var he = document.querySelector('header.hero'); if (he) he.classList.remove('hero--campaign');
+      return;
+    }
     var anchor = model;
     list.forEach(function (c, i) {
       var sec = i === 0 ? model : document.createElement('section');
@@ -125,10 +188,13 @@
       sec.setAttribute('aria-labelledby', 'cv-title-' + c.id);
       sec.dataset.start = c.start_date; sec.dataset.end = c.end_date || ''; sec.dataset.kind = c.kind || 'campagne'; sec.dataset.title = c.title;
       sec.innerHTML = render(c);
+      if (i === 0) sec.querySelector('.container').insertAdjacentHTML('beforeend', '<div class="cv-voice" data-tm-row></div>');
       if (i > 0) { anchor.parentNode.insertBefore(sec, anchor.nextSibling); anchor = sec; }
       setup(sec);
       if (window.MWAS && window.MWAS.reveal) window.MWAS.reveal(sec); else sec.querySelectorAll('.reveal').forEach(function (r) { r.classList.add('visible', 'is-visible', 'show'); });
     });
+    hero(pickHero(list));
+    announce();
     var hash = location.hash.slice(1);
     if (hash && (hash === 'campagne-vbg' || /^campagne-/.test(hash))) {
       var target = document.getElementById(hash) || model;
