@@ -17,10 +17,14 @@ if (fs.existsSync(envFile)) {
 }
 if (!process.env.SITE_URL) process.env.SITE_URL = 'http://localhost:' + PORT;
 
+
+// DNS de secours si le DNS de Windows ne trouve pas Supabase (voir tools/dns-secours.js)
+require('./tools/dns-secours');
+
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.gif': 'image/gif', '.ico': 'image/x-icon', '.mp4': 'video/mp4' };
 const API = ['public', 'admin', 'auth', 'donate', 'donate-callback'];
 
-http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
   const name = url.pathname.replace(/^\/api\//, '').replace(/\/$/, '');
 
@@ -44,9 +48,19 @@ http.createServer((req, res) => {
   }
   res.setHeader('Content-Type', TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream');
   fs.createReadStream(file).pipe(res);
-}).listen(PORT, () => {
+});
+// Si le port est déjà pris (un ancien serveur encore ouvert), on essaie automatiquement le suivant
+let port = Number(PORT), tries = 0;
+server.on('error', err => {
+  if (err.code === 'EADDRINUSE' && tries < 10) {
+    console.log('  Le port ' + port + ' est déjà utilisé (un autre serveur tourne sans doute déjà) → essai du port ' + (port + 1) + '…');
+    tries++; port++; setTimeout(() => server.listen(port), 150);
+  } else { console.error(err); process.exit(1); }
+});
+server.on('listening', () => {
   console.log('\n  Site MWAS lancé :');
-  console.log('  → Site public      : http://localhost:' + PORT);
-  console.log('  → Administration   : http://localhost:' + PORT + '/admin/');
+  console.log('  → Site public      : http://localhost:' + port);
+  console.log('  → Administration   : http://localhost:' + port + '/admin/');
   console.log('\n  (Ctrl + C pour arrêter)\n');
 });
+server.listen(port);

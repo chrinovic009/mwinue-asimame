@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node serveur-local.js",
-    "check": "node -e \"['./api/public','./api/admin','./api/auth','./api/donate','./api/donate-callback'].forEach(require); console.log('API OK')\""
+    "check": "node -e \"['./api/public','./api/admin','./api/auth','./api/donate','./api/donate-callback'].forEach(require); console.log('API OK')\"",
+    "reset-password": "node tools/reset-mot-de-passe.js"
   }
 }
