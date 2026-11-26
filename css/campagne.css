@@ -177,3 +177,14 @@
 }
 .hero--campaign .hero-video-play { top: 16%; left: 84%; width: 62px; height: 62px; font-size: 2rem; box-shadow: 0 10px 26px rgba(0,0,0,.35); }
 .hero--campaign .hero-video-cover img { object-position: 50% 58%; }
+
+/* Hero en mode campagne : le texte parle de la campagne en cours */
+.hc-content h1 { font-size: clamp(2.1rem, 4.4vw, 3.4rem); line-height: 1.08; }
+.hc-eyebrow { display: inline-flex; align-items: center; gap: .5rem; background: #E8611A !important; color: #fff !important; box-shadow: 0 8px 20px rgba(232, 97, 26, .3); }
+.hc-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: hc-live 1.4s ease-out infinite; }
+.hc-sign { display: flex; align-items: center; gap: .6rem; color: var(--n-slate, #7a6458); font-size: .9rem; margin: 0; }
+.hc-sign img { width: 34px; height: 34px; object-fit: contain; }
+@media (max-width: 991.98px) { .hc-sign { justify-content: center; } .hc-content { text-align: center; } }
+.hc-chip-img { position: absolute; left: 16px; bottom: 16px; margin: 0 !important; z-index: 3; }
+.hero-video-card { position: relative; }
+.hc-eyebrow::before { display: none !important; }

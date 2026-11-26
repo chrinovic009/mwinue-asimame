@@ -114,11 +114,44 @@
   var RIBBON = '<svg viewBox="0 0 40 56" aria-hidden="true"><path d="M20 4c-6 0-10 4.5-10 10.5 0 4.6 3 9.4 6.4 14.1L6 49l7 3 7-15.6L27 52l7-3-10.4-20.4C27 23.9 30 19.1 30 14.5 30 8.5 26 4 20 4Zm0 6c2.6 0 4.3 2 4.3 4.6 0 2.4-1.7 5.6-4.3 9.3-2.6-3.7-4.3-6.9-4.3-9.3C15.7 12 17.4 10 20 10Z"/></svg>';
   var heroTimer = null;
   function pad(n) { return (n < 10 ? '0' : '') + n; }
+  var heroOrig = null;
+  function shortLead(t) {
+    t = String(t || '').trim(); if (!t) return '';
+    var first = t.split(/(?<=[.!?])\s+/)[0];
+    return first.length > 150 ? first.slice(0, 147).replace(/\s+\S*$/, '') + '…' : first;
+  }
+  function shortTheme(t) { return String(t).split(/\s+(?:&|et)\s+/)[0].replace(/^Pratiques traditionnelles néfastes$/i, 'Pratiques néfastes'); }
+  // Pendant la campagne, le hero parle d'elle : titre, accroche, thèmes, boutons Témoigner / Découvrir
+  function heroText(c) {
+    var box = document.querySelector('header.hero .hero-content');
+    if (!box) return;
+    if (heroOrig === null) heroOrig = box.innerHTML;
+    var link = '#' + (c.id ? 'campagne-' + c.id : 'campagne-vbg');
+    var word = c.kind === 'mobilisation' ? 'Mobilisation' : 'Campagne';
+    var themes = (Array.isArray(c.themes) ? c.themes : []).slice(0, 4);
+    box.classList.add('hc-content');
+    box.innerHTML =
+      '<span class="eyebrow hc-eyebrow"><span class="hc-dot" aria-hidden="true"></span>' + word + ' en cours · ' + esc(c.category || c.title) + '</span>' +
+      '<h1 class="mb-3">' + esc(c.headline || c.title) + (c.headline_highlight ? ' <span class="text-primary-custom">' + esc(c.headline_highlight) + '</span>' : '') + '</h1>' +
+      (c.lead ? '<p class="fs-5 mb-4 hero-lead" style="max-width:560px">' + esc(shortLead(c.lead)) + '</p>' : '') +
+      (themes.length ? '<ul class="hero-pills" aria-label="Thèmes de la campagne">' + themes.map(function (t) { return '<li><i class="bi bi-' + iconFor(t) + '"></i>' + esc(shortTheme(t)) + '</li>'; }).join('') + '</ul>' : '') +
+      '<div class="d-flex flex-wrap gap-3 mb-4 justify-content-lg-start justify-content-center">' +
+        '<button type="button" class="btn btn-primary btn-lg-custom" data-tm-open="form"><i class="bi bi-shield-lock-fill"></i> Témoigner anonymement</button>' +
+        '<a href="' + link + '" class="btn btn-light-custom btn-lg-custom"><i class="bi bi-megaphone-fill text-primary-custom"></i> Découvrir la campagne</a>' +
+      '</div>' +
+      '<p class="hc-sign"><img src="img/icone.png" alt="" width="34" height="34"> Une ' + word.toLowerCase() + ' portée par <strong>Mwinue Asimame</strong></p>';
+  }
+  function heroReset() {
+    var box = document.querySelector('header.hero .hero-content');
+    if (box && heroOrig !== null) { box.innerHTML = heroOrig; box.classList.remove('hc-content'); heroOrig = null; }
+  }
   function hero(c) {
     var heroEl = document.querySelector('header.hero'), visual = heroEl && heroEl.querySelector('.hero-visual');
-    if (!visual || !c || !c.start_date) return;
+    if (!heroEl || !c || !c.start_date) return;
+    var t = today();
+    if (c.end_date && c.end_date < t) return;
     var img = c.hero_image || c.poster;
-    if (img) {
+    if (visual && img) {
       var cov = visual.querySelector('.hero-video-cover img'); if (cov) { cov.src = img; cov.alt = c.title; }
       var v = visual.querySelector('video'); if (v) v.setAttribute('poster', img);
     }
@@ -128,34 +161,14 @@
       fl.innerHTML = [1, 2, 3, 4, 5, 6].map(function (i) { return '<span style="--i:' + i + '">' + RIBBON + '</span>'; }).join('');
       heroEl.insertBefore(fl, heroEl.firstChild);
     }
-    var w = visual.querySelector('.hc-widget');
-    if (!w) { w = document.createElement('div'); w.className = 'hc-widget'; visual.appendChild(w); }
-    var link = '#' + (c.id ? 'campagne-' + c.id : 'campagne-vbg');
-    w.innerHTML = '<a class="hc-chip" href="' + link + '"><span class="hc-live"></span><span data-hc-state>En cours</span></a>' +
-      '<div class="hc-card"><div class="hc-top"><span class="hc-ribbon">' + RIBBON + '</span><div class="hc-title"><strong>' + esc(c.title) + '</strong><small data-hc-day></small></div></div>' +
-      '<div class="hc-label" data-hc-label>Fin dans</div>' +
-      '<div class="hc-count"><div><b data-u="d">--</b><span>jours</span></div><div><b data-u="h">--</b><span>heures</span></div><div><b data-u="m">--</b><span>min</span></div><div><b data-u="s">--</b><span>sec</span></div></div>' +
-      '<div class="hc-bar"><span data-hc-bar></span></div>' +
-      '<div class="hc-actions"><a href="' + link + '" class="hc-btn"><i class="bi bi-eye"></i> Découvrir</a><button type="button" class="hc-btn hc-btn-alt" data-tm-open="form"><i class="bi bi-shield-lock"></i> Témoigner</button></div></div>';
-    var start = new Date(c.start_date + 'T00:00:00+02:00').getTime();
-    var end = c.end_date ? new Date(c.end_date + 'T23:59:59+02:00').getTime() : 0;
-    var total = c.end_date ? diff(c.start_date, c.end_date) + 1 : 0;
-    var word = c.kind === 'mobilisation' ? 'Mobilisation' : 'Campagne';
-    function tick() {
-      var now = Date.now(), target, before = now < start;
-      if (before) target = start; else if (end && now <= end) target = end; else if (!end) target = 0; else { w.classList.add('is-over'); w.querySelector('[data-hc-state]').textContent = word + ' terminée'; w.querySelector('[data-hc-label]').textContent = 'Merci pour votre mobilisation'; clearInterval(heroTimer); return; }
-      var day = diff(c.start_date, today()) + 1;
-      w.querySelector('[data-hc-state]').textContent = before ? 'Bientôt' : word + ' en cours';
-      w.querySelector('[data-hc-day]').textContent = before ? 'Lancement le ' + frDate(c.start_date, true) : 'Jour ' + day + (total ? ' sur ' + total : '');
-      w.querySelector('[data-hc-label]').textContent = before ? 'Lancement dans' : (target ? 'Fin dans' : 'Mobilisation en cours');
-      var left = Math.max(0, (target || now) - now) / 1000;
-      var u = { d: Math.floor(left / 86400), h: Math.floor(left % 86400 / 3600), m: Math.floor(left % 3600 / 60), s: Math.floor(left % 60) };
-      Object.keys(u).forEach(function (k) { var el = w.querySelector('[data-u="' + k + '"]'); var v = k === 'd' ? String(u[k]) : pad(u[k]); if (el.textContent !== v) { el.textContent = v; el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick'); } });
-      w.querySelector('.hc-count').hidden = !target;
-      var pct = before || !total ? 0 : Math.min(100, (now - start) / (end - start) * 100);
-      w.querySelector('[data-hc-bar]').style.width = pct + '%';
+    if (visual) {
+      var chip = visual.querySelector('.hc-chip');
+      if (!chip) { chip = document.createElement('a'); chip.className = 'hc-chip hc-chip-img'; visual.querySelector('.hero-video-card').appendChild(chip); }
+      chip.href = '#' + (c.id ? 'campagne-' + c.id : 'campagne-vbg');
+      var live = c.start_date <= t;
+      chip.innerHTML = '<span class="hc-live"></span>' + (live ? 'En direct · Jour ' + (diff(c.start_date, t) + 1) + (c.end_date ? ' / ' + (diff(c.start_date, c.end_date) + 1) : '') : 'Bientôt');
     }
-    clearInterval(heroTimer); tick(); heroTimer = setInterval(tick, 1000);
+    heroText(c);
   }
   function pickHero(list) {
     var t = today();
@@ -168,14 +181,20 @@
   var model = document.querySelector('.campaign-vbg');
   if (model) {
     setup(model); // repli statique immédiat
-    hero({ title: model.dataset.title, start_date: model.dataset.start, end_date: model.dataset.end, kind: model.dataset.kind, hero_image: model.dataset.hero });
+    var h2 = model.querySelector('h2'), hl = h2 && h2.querySelector('.cv-hl');
+    hero({
+      title: model.dataset.title, start_date: model.dataset.start, end_date: model.dataset.end, kind: model.dataset.kind, hero_image: model.dataset.hero,
+      headline: h2 ? h2.textContent.replace(hl ? hl.textContent : '', '').trim() : '', headline_highlight: hl ? hl.textContent.trim() : '',
+      lead: (model.querySelector('.cv-lead') || {}).textContent || '',
+      themes: Array.prototype.map.call(model.querySelectorAll('.cv-form'), function (f) { return f.textContent.trim(); })
+    });
   }
   document.addEventListener('mwas:site', function (e) {
     var list = e.detail && e.detail.campaigns;
     if (!model || !Array.isArray(list)) return; // API indisponible : on garde la version statique
     if (!list.length) {
-      model.hidden = true; clearInterval(heroTimer);
-      var hw = document.querySelector('.hc-widget'); if (hw) hw.remove();
+      model.hidden = true; heroReset();
+      var hw = document.querySelector('.hc-chip-img'); if (hw) hw.remove();
       var hf = document.querySelector('.hc-float'); if (hf) hf.remove();
       var he = document.querySelector('header.hero'); if (he) he.classList.remove('hero--campaign');
       return;
