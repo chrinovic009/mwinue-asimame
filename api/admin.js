@@ -103,7 +103,7 @@ async function dashboard(user) {
   if (can(user, 'campaigns')) {
     await camp.finalizeDue();
     [toDecide, activeCampaigns] = await Promise.all([
-      db.select('campaigns', 'select=id,title,kind,latest_choice,realisation_id,end_date&status=eq.finished&latest_choice=in.(pending,later)&order=finished_at.desc').catch(() => []),
+      db.select('campaigns', 'select=id,title,kind,latest_choice,realisation_id,start_date,end_date,realised_on&status=eq.finished&latest_choice=in.(pending,later)&order=finished_at.desc').catch(() => []),
       db.count('campaigns', 'status=eq.active').catch(() => 0)
     ]);
   }
@@ -364,16 +364,19 @@ module.exports = C.handler(async (req) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(end)) throw new HttpError(400, 'Date de fin invalide.');
     if (end < c.start_date) throw new HttpError(400, 'La date de fin ne peut pas précéder la date de lancement.');
     const list = (v, n) => Array.isArray(v) ? v.map(x => C.str(x, n)).filter(Boolean) : undefined;
-    const out = await camp.finish(c, { user, end_date: end, report: list(b.report, 5000), photos: list(b.photos, 1000), publish: can(user, 'publish') });
+    const realisedOn = camp.checkDate(b.realised_on, c);
+    const out = await camp.finish(c, { user, end_date: end, realised_on: realisedOn, report: list(b.report, 5000), photos: list(b.photos, 1000) });
     return Object.assign(out, { can_set_latest: can(user, 'home') });
   }
   if (r === 'campaign-latest' && req.method === 'POST') {
     need(user, 'campaigns');
     const choice = String(b.choice || '');
     if (!['yes', 'no', 'later'].includes(choice)) throw new HttpError(400, 'Choix invalide.');
-    const c = await db.one('campaigns', 'select=*&id=eq.' + enc(id));
+    let c = await db.one('campaigns', 'select=*&id=eq.' + enc(id));
     if (!c) throw new HttpError(404, 'Campagne introuvable.');
     if (c.status !== 'finished') throw new HttpError(400, 'La campagne doit d’abord être terminée.');
+    if (b.realised_on) c = await camp.setRealisedOn(c, b.realised_on, user);
+    else if (choice !== 'later' && !c.realised_on) throw new HttpError(400, 'Indiquez d’abord la date précise de la réalisation.');
     if (choice === 'yes') { need(user, 'home'); await camp.setLatest(c, user); }
     const item = await db.update('campaigns', 'id=eq.' + enc(id), { latest_choice: choice, updated_at: new Date().toISOString() });
     await C.audit(user, 'latest-choice', 'campaigns', id, { choice });

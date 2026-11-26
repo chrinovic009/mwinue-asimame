@@ -41,11 +41,22 @@ html.has-cb .navbar-nexora.fixed-top { top: var(--cb-h, 0px); }
   .cb-main { flex: 0 0 auto; }
   .cb-count { flex: 1 1 auto; justify-content: center; }
 }
-@media (max-width: 420px) {
-  .cb-s { display: none; }
-  .cb-btn span { display: none; }
-  .cb-btn { padding: .4rem .6rem; }
-  .cb-ribbon { display: none; }
+@media (max-width: 575.98px) {
+  .cb-inner { padding: .4rem .6rem; gap: .4rem; }
+  .cb-ribbon, .cb-s, .cb-u i { display: none; }
+  .cb-day { padding: .2rem .5rem; font-size: .72rem; }
+  .cb-count { gap: .2rem; }
+  .cb-u { padding: .12rem .35rem; }
+  .cb-u b { font-size: .88rem; }
+  .cb-u b::after { font-weight: 600; font-size: .62rem; opacity: .8; margin-left: 1px; }
+  .cb-u:nth-child(2) b::after { content: "j"; }
+  .cb-u:nth-child(3) b::after { content: "h"; }
+  .cb-u:nth-child(4) b::after { content: "m"; }
+  .cb-btn { padding: .36rem .7rem; font-size: .78rem; gap: .3rem; white-space: nowrap; }
+}
+@media (max-width: 359.98px) {
+  .cb-live { display: none; }
+  .cb-btn i { display: none; }
 }
 
 @keyframes cb-flow { to { background-position: 100% 0; } }

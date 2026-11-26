@@ -197,8 +197,14 @@ async function call(name, method, query, body, token, headers) {
   const cid = r.body.item.id;
   r = await call('public', 'GET', { r: 'site' });
   assert.equal(r.body.campaigns.length, 1, 'campagne sans date de fin affichée');
-  r = await call('admin', 'POST', { r: 'campaign-finish', id: cid }, { report: ['Bilan : 300 personnes touchées'], photos: ['img/photo1.jpg'] }, s4);
+  r = await call('admin', 'POST', { r: 'campaign-finish', id: cid }, { report: ['x'] }, s4);
+  assert.equal(r.status, 400, 'date de réalisation obligatoire');
+  r = await call('admin', 'POST', { r: 'campaign-finish', id: cid }, { realised_on: '2099-01-01' }, s4);
+  assert.equal(r.status, 400, 'date future refusée');
+  assert.equal(T.campaigns.find(x => x.id === cid).status, 'active', 'refus sans effet');
+  r = await call('admin', 'POST', { r: 'campaign-finish', id: cid }, { realised_on: '2020-01-03', report: ['Bilan : 300 personnes touchées'], photos: ['img/photo1.jpg'] }, s4);
   assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal(r.body.realisation.event_date, '2020-01-03'); assert.equal(r.body.realisation.published, true);
   assert.equal(r.body.realisation.slug, 'test-campagne');
   assert.equal(r.body.realisation.image, 'img/photo1.jpg');
   assert.equal(r.body.campaign.latest_choice, 'pending');
@@ -227,8 +233,12 @@ async function call(name, method, query, body, token, headers) {
   assert.equal(r.body.campaigns.length, 0);
   const c2 = T.campaigns.find(x => x.id === cid2);
   assert.equal(c2.status, 'finished'); assert.equal(c2.latest_choice, 'pending'); assert.ok(T.realisations.find(x => x.slug === 'campagne-echue'));
+  assert.equal(T.realisations.find(x => x.slug === 'campagne-echue').event_date, null, 'date en attente de l’admin');
   r = await call('admin', 'POST', { r: 'campaign-latest', id: cid2 }, { choice: 'no' }, s4);
-  assert.equal(r.status, 200); assert.equal(T.settings.find(x => x.key === 'latest_activity').value.title, 'Test campagne', 'dernière activité inchangée');
+  assert.equal(r.status, 400, 'date exigée avant de répondre');
+  r = await call('admin', 'POST', { r: 'campaign-latest', id: cid2 }, { choice: 'no', realised_on: '2020-02-04' }, s4);
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal(T.realisations.find(x => x.slug === 'campagne-echue').event_date, '2020-02-04'); assert.equal(T.settings.find(x => x.key === 'latest_activity').value.title, 'Test campagne', 'dernière activité inchangée');
 
   // Témoignages anonymes : dépôt, code, lecture privée, réponse, publication masquée
   r = await call('public', 'POST', { r: 'testimony' }, { role: 'victime', category: 'physique', content: 'court' });
@@ -259,6 +269,15 @@ async function call(name, method, query, body, token, headers) {
   assert.ok(r.body.items[0].reply);
   r = await call('public', 'POST', { r: 'testimony-check' }, { code });
   assert.ok(r.body.reply && r.body.published);
+  // Les témoignages publiés pendant une campagne restent visibles sur sa réalisation
+  tm.campaign_id = cid2;
+  r = await call('public', 'GET', { r: 'realisation', slug: 'campagne-echue' });
+  assert.equal(r.body.item.testimonies.length, 1, JSON.stringify(r.body.item));
+  assert.ok(!/Kolwezi|Kanina|Lumumba|812/.test(JSON.stringify(r.body.item.testimonies)));
+  r = await call('public', 'GET', { r: 'realisation', slug: 'test-campagne' });
+  assert.equal(r.body.item.testimonies.length, 0);
+  r = await call('public', 'GET', { r: 'testimonies', campaign: cid2 });
+  assert.equal(r.body.items.length, 1);
   r = await call('admin', 'PUT', { r: 'testimonies', id: tm.id }, { published: false }, s4);
   r = await call('public', 'GET', { r: 'testimonies' });
   assert.equal(r.body.items.length, 0, 'retiré du site');

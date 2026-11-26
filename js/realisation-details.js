@@ -62,6 +62,9 @@
       }).join('');
     }
 
+    // Réalisation issue d'une campagne : les témoignages publiés restent visibles
+    if (item.campaign && window.MWAS_TM) window.MWAS_TM.renderFor($('realisationTestimonies'), item.testimonies);
+
     M.engage({ type: 'realisation', id: item.id, item: item, title: item.title, statsEl: $('realisationStats'), commentsEl: $('commentaires'), heading: 'Commentaires', subheading: 'Partagez votre avis ou votre expérience sur cette activité.' });
   }
 

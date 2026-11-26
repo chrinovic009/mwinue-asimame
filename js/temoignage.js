@@ -175,7 +175,32 @@
     if (m) { var p = m.previousElementSibling; p.classList.toggle('is-clamped'); m.textContent = p.classList.contains('is-clamped') ? 'Lire la suite' : 'Réduire'; }
   });
 
-  window.MWAS_TM = { fill: fillRows, open: open };
+  /* ---------- Bloc permanent : visible dès qu'aucune campagne n'est affichée ---------- */
+  function syncPerma() {
+    var perma = document.querySelector('[data-tm-perma]');
+    if (!perma) return;
+    var live = Array.prototype.some.call(document.querySelectorAll('.campaign-vbg [data-tm-row]'), function (r) { return !r.closest('[hidden]'); });
+    perma.hidden = live;
+  }
+  document.addEventListener('mwas:site', function () { setTimeout(syncPerma, 0); });
+
+  /* ---------- Témoignages d'une réalisation issue d'une campagne ---------- */
+  function renderFor(el, items) {
+    if (!el) return;
+    items = items || [];
+    el.hidden = false;
+    el.innerHTML = '<div class="tm-real reveal visible">' +
+      '<div class="tm-real-head"><span class="tm-real-icon"><i class="bi bi-chat-heart-fill"></i></span><div><h3>Elles et ils ont osé parler</h3><p>Témoignages anonymes reçus pendant la campagne · aucun nom, aucun lieu.</p></div>' +
+      (items.length ? '<span class="tm-real-count">' + items.length + '</span>' : '') + '</div>' +
+      (items.length ? '<div class="tm-track">' + items.map(card).join('') + '</div>'
+                    : '<div class="tm-wall-empty"><i class="bi bi-chat-heart"></i><p>Aucun témoignage publié pour cette activité.</p></div>') +
+      '<div class="tm-real-foot"><span><i class="bi bi-shield-lock-fill"></i> Vous aussi, vous pouvez parler en toute confidentialité.</span>' +
+      '<button type="button" class="cv-btn cv-btn-primary" data-tm-open="form"><i class="bi bi-pencil-square"></i> Témoigner anonymement</button>' +
+      '<button type="button" class="cv-btn cv-btn-ghost" data-tm-open="check"><i class="bi bi-key"></i> J\'ai un code</button></div>' +
+    '</div>';
+  }
+
+  window.MWAS_TM = { fill: fillRows, open: open, card: card, renderFor: renderFor, syncPerma: syncPerma };
   document.addEventListener('mwas:campaigns', fillRows);
   document.addEventListener('DOMContentLoaded', fillRows);
   if (location.hash === '#temoigner') document.addEventListener('DOMContentLoaded', function () { open('form'); });

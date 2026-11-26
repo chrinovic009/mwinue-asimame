@@ -6,6 +6,7 @@ const camp = require('../lib/campaigns');
 const TM = require('../lib/testimonies');
 
 const TYPES = { realisation: 'realisations', article: 'articles' };
+const TM_PUBLIC = 'id,role,category,content,public_text,reply,reply_public,published_at,created_at';
 const CARD_R = 'id,slug,title,heading,category,image,summary,event_date,location,featured,views,likes,created_at,sort';
 const CARD_A = 'id,slug,title,category,image,alt,excerpt,tags,read_minutes,author_name,published_at,views,likes';
 
@@ -75,8 +76,17 @@ module.exports = C.handler(async (req, res) => {
       const slug = C.str(req.query.slug, 120);
       const item = await db.one('realisations', 'select=*&published=eq.true&slug=eq.' + enc(slug));
       if (!item) throw new HttpError(404, 'Réalisation introuvable.');
-      const list = await db.select('realisations', 'select=slug,title&published=eq.true&order=sort.asc,created_at.desc');
+      const [list, origin] = await Promise.all([
+        db.select('realisations', 'select=slug,title&published=eq.true&order=sort.asc,created_at.desc'),
+        db.one('campaigns', 'select=id,kind,title&realisation_id=eq.' + enc(item.id)).catch(() => null)
+      ]);
       delete item.author_id;
+      // Réalisation issue d'une campagne : ses témoignages publiés restent visibles ici
+      if (origin) {
+        const rows = await db.select('testimonies', 'select=' + TM_PUBLIC + '&campaign_id=eq.' + enc(origin.id) + '&published=eq.true&allow_publish=eq.true&order=published_at.desc&limit=100').catch(() => []);
+        item.campaign = { kind: origin.kind };
+        item.testimonies = rows.map(TM.publicItem);
+      }
       return { item, list };
     }
 
@@ -130,7 +140,9 @@ module.exports = C.handler(async (req, res) => {
     }
     /* ----- Témoignages publiés (anonymes, relus et autorisés) ----- */
     if (r === 'testimonies') {
-      const rows = await db.select('testimonies', 'select=id,role,category,content,public_text,reply,reply_public,published_at,created_at&published=eq.true&allow_publish=eq.true&order=published_at.desc&limit=30');
+      const camp = C.str(req.query.campaign, 40);
+      const only = /^[0-9a-f-]{36}$/i.test(camp) ? '&campaign_id=eq.' + enc(camp) : '';
+      const rows = await db.select('testimonies', 'select=' + TM_PUBLIC + only + '&published=eq.true&allow_publish=eq.true&order=published_at.desc&limit=' + (only ? 100 : 30));
       cache(res, 30);
       return { items: rows.map(TM.publicItem) };
     }

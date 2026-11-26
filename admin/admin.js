@@ -796,6 +796,7 @@
       if (!el) {
         document.body.insertAdjacentHTML('beforeend', '<div class="modal fade" id="latestAskModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content latest-ask">' +
           '<div class="modal-body text-center p-4"><div class="latest-ask-icon"><i class="bi bi-house-heart"></i></div><h5 class="mt-3 mb-2" data-ask-title></h5><p class="text-muted mb-4" data-ask-text></p>' +
+          '<div class="latest-ask-date text-start mb-4" data-ask-date><label class="form-label fw-semibold" for="latestAskDate"><i class="bi bi-calendar-check me-1"></i>Date précise de la réalisation</label><input type="date" class="form-control" id="latestAskDate"><div class="form-text">Elle sera affichée sur la réalisation.</div></div>' +
           '<div class="d-grid gap-2"><button class="btn btn-brand" data-choice="yes"><i class="bi bi-check2 me-1"></i>Oui, la placer comme dernière activité</button>' +
           '<button class="btn btn-light" data-choice="no">Non, seulement dans les réalisations</button>' +
           '<button class="btn btn-link text-muted" data-choice="later">Plus tard</button></div><p class="small text-danger mt-3 mb-0" data-ask-error></p></div></div></div></div>');
@@ -803,15 +804,21 @@
       }
       const m = bootstrap.Modal.getOrCreateInstance(el);
       $('[data-ask-title]', el).textContent = '« ' + c.title + ' » est terminée';
-      $('[data-ask-text]', el).textContent = 'Elle figure désormais dans vos réalisations. Voulez-vous la placer comme dernière activité sur la page d’accueil ?' + (can('home') ? '' : ' (Seul un utilisateur autorisé à gérer la page d’accueil peut répondre « Oui ».)');
+      $('[data-ask-text]', el).textContent = 'Elle figure désormais dans vos réalisations, avec ses témoignages publiés. Voulez-vous la placer comme dernière activité sur la page d’accueil ?' + (can('home') ? '' : ' (Seul un utilisateur autorisé à gérer la page d’accueil peut répondre « Oui ».)');
+      const needDate = !c.realised_on, dateIn = $('#latestAskDate', el);
+      $('[data-ask-date]', el).hidden = !needDate;
+      dateIn.value = ''; dateIn.max = kinToday(); if (c.start_date) dateIn.min = c.start_date;
       $('[data-choice="yes"]', el).disabled = !can('home');
       $('[data-ask-error]', el).textContent = '';
       let answered = false;
       el.onclick = async e => {
         const b = e.target.closest('[data-choice]'); if (!b) return;
+        const body = { choice: b.dataset.choice };
+        if (needDate && dateIn.value) body.realised_on = dateIn.value;
+        if (needDate && !dateIn.value && body.choice !== 'later') { $('[data-ask-error]', el).textContent = 'Indiquez d’abord la date précise de la réalisation.'; dateIn.focus(); return; }
         busy(b, true);
         try {
-          await api('admin?r=campaign-latest&id=' + c.id, { method: 'POST', body: { choice: b.dataset.choice } });
+          await api('admin?r=campaign-latest&id=' + c.id, { method: 'POST', body });
           answered = true;
           toast(({ yes: 'C’est maintenant la dernière activité de l’accueil.', no: 'Elle reste uniquement dans les réalisations.', later: 'D’accord : vous pourrez décider plus tard depuis « Campagnes ».' })[b.dataset.choice]);
           m.hide(); refreshCounts();
@@ -1149,14 +1156,14 @@
         list.innerHTML = '<div class="table-wrap table-responsive"><table class="table"><thead><tr><th>Campagne</th><th>Période</th><th>État</th><th class="text-end">Actions</th></tr></thead><tbody>' +
           items.map(i => {
             const done = i.status !== 'active';
-            const decide = i.status === 'finished' && (i.latest_choice === 'pending' || i.latest_choice === 'later');
+            const decide = i.status === 'finished' && (i.latest_choice === 'pending' || i.latest_choice === 'later' || !i.realised_on);
             return '<tr data-id="' + i.id + '"><td><div class="d-flex gap-2 align-items-center"><img class="thumb" src="' + esc(src(i.poster)) + '" alt=""><div><div class="cell-title">' + esc(i.title) + '</div><div class="cell-sub">' + kindLabel(i) + (i.location ? ' · ' + esc(i.location) : '') + '</div></div></div></td>' +
               '<td class="small text-nowrap">' + fmtDate(i.start_date) + '<br><span class="text-muted">' + (i.end_date ? 'au ' + fmtDate(i.end_date) : 'sans date de fin') + '</span></td>' +
               '<td>' + campaignState(i) + '</td>' +
               '<td><div class="row-actions">' +
               (!done && i.published !== false ? '<a class="btn btn-light btn-sm" target="_blank" rel="noopener" href="/index.html#campagne-' + i.id + '" title="Voir sur l’accueil"><i class="bi bi-box-arrow-up-right"></i></a>' : '') +
               (i.realisation_id && can('realisations') ? '<a class="btn btn-light btn-sm" href="#realisations?open=' + i.realisation_id + '" title="Ouvrir la réalisation"><i class="bi bi-flag"></i></a>' : '') +
-              (decide ? '<button class="btn btn-soft btn-sm" data-decide title="Placer comme dernière activité ?"><i class="bi bi-house-heart me-1"></i>Dernière activité ?</button>' : '') +
+              (decide ? '<button class="btn btn-soft btn-sm" data-decide title="' + (i.realised_on ? 'Placer comme dernière activité ?' : 'Indiquer la date de la réalisation') + '"><i class="bi bi-' + (i.realised_on ? 'house-heart' : 'calendar-check') + ' me-1"></i>' + (i.realised_on ? 'Dernière activité ?' : 'Date à préciser') + '</button>' : '') +
               (!done ? '<button class="btn btn-soft btn-sm" data-finish title="Terminer et créer la réalisation"><i class="bi bi-flag-fill me-1"></i>Terminer</button>' : '') +
               '<button class="btn btn-light btn-sm" data-edit title="Modifier"><i class="bi bi-pencil"></i></button>' +
               (can('delete') ? '<button class="btn btn-light btn-sm text-danger" data-del title="Supprimer"><i class="bi bi-trash"></i></button>' : '') +
@@ -1175,8 +1182,9 @@
       function finish(item) {
         const word = item.kind === 'mobilisation' ? 'la mobilisation' : 'la campagne';
         openEditor('Terminer ' + word + ' : ' + item.title, [
-          { type: 'section', label: 'Clôture — ' + word + ' deviendra une réalisation' },
+          { type: 'section', label: 'Clôture — ' + word + ' deviendra obligatoirement une réalisation (ses témoignages publiés y resteront)' },
           { name: 'end_date', label: 'Date de fin effective', type: 'date', required: true, col: 'col-md-6' },
+          { name: 'realised_on', label: 'Date précise de la réalisation', type: 'date', required: true, col: 'col-md-6', help: 'Affichée sur la réalisation.' },
           { name: 'report', label: 'Bilan (facultatif) : ce qui a été réalisé, chiffres clés…', type: 'list', labels: ['Paragraphe du bilan'], addLabel: 'Ajouter un paragraphe' },
           { name: 'photos', label: "Photos de l'activité (facultatif — la 1re devient l'image de la réalisation)", type: 'images', folder: 'realisations' }
         ], { end_date: item.end_date && item.end_date < kinToday() ? item.end_date : kinToday() }, async values => {

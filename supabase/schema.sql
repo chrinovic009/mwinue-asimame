@@ -320,6 +320,9 @@ revoke all on table campaigns from anon, authenticated;
 
 -- Image du hero pendant une campagne
 alter table campaigns add column if not exists hero_image text;
+-- Date précise de la réalisation, communiquée par l'administrateur à la clôture
+alter table campaigns add column if not exists realised_on date;
+create index if not exists testimonies_campaign_pub_idx on testimonies (campaign_id) where published;
 
 -- Témoignages anonymes (victimes / témoins) : privés par défaut, publication après relecture et accord
 create table if not exists testimonies (
